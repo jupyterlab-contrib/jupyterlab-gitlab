@@ -1,0 +1,13 @@
+*.bundle.*
+dist/
+jupyterlab_github.egg-info/
+__pycache__/
+lib/
+test/build/*
+node_modules/
+.pytest_cache/
+.vscode/
+.idea/
+.ipynb_checkpoints/
+npm-debug.log
+package-lock.json
