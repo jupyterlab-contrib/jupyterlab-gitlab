@@ -1,17 +1,17 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-GitHub-icon",
-  "jupyter.lab.setting-icon-label": "GitHub",
-  "title": "GitHub",
-  "description": "Settings for the GitHub plugin.",
+  "jupyter.lab.setting-icon-class": "jp-GitLab-icon",
+  "jupyter.lab.setting-icon-label": "GitLab",
+  "title": "GitLab",
+  "description": "Settings for the GitLab plugin.",
   "properties": {
     "baseUrl": {
       "type": "string",
-      "title": "The GitHub Base URL",
-      "default": "https://github.com"
+      "title": "The GitLab Base URL",
+      "default": "https://gitlab.com"
     },
     "accessToken": {
       "type": "string",
-      "title": "A GitHub Personal Access Token",
+      "title": "A GitLab Personal Access Token",
       "description": "WARNING: For security reasons access tokens should be set in the server extension.",
       "default": ""
     },

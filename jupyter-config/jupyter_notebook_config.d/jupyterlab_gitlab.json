@@ -1,7 +1,7 @@
 {
   "NotebookApp": {
     "nbserver_extensions": {
-      "jupyterlab_github": true
+      "jupyterlab_gitlab": true
     }
   }
 }

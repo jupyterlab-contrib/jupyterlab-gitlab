@@ -13,7 +13,7 @@ import { FileBrowser } from '@jupyterlab/filebrowser';
 
 import { ObservableValue } from '@jupyterlab/observables';
 
-import { GitHubDrive, parsePath } from './contents';
+import { GitLabDrive, parsePath } from './contents';
 
 /**
  * The base url for a mybinder deployment.
@@ -26,32 +26,32 @@ const MY_BINDER_BASE_URL = 'https://mybinder.org/v2/gh';
 const MY_BINDER_DISABLED = 'jp-MyBinderButton-disabled';
 
 /**
- * Widget for hosting the GitHub filebrowser.
+ * Widget for hosting the GitLab filebrowser.
  */
-export class GitHubFileBrowser extends Widget {
-  constructor(browser: FileBrowser, drive: GitHubDrive) {
+export class GitLabFileBrowser extends Widget {
+  constructor(browser: FileBrowser, drive: GitLabDrive) {
     super();
-    this.addClass('jp-GitHubBrowser');
+    this.addClass('jp-GitLabBrowser');
     this.layout = new PanelLayout();
     (this.layout as PanelLayout).addWidget(browser);
     this._browser = browser;
     this._drive = drive;
 
     // Create an editable name for the user/org name.
-    this.userName = new GitHubEditableName('', '<Edit User>');
-    this.userName.addClass('jp-GitHubEditableUserName');
+    this.userName = new GitLabEditableName('', '<Edit User>');
+    this.userName.addClass('jp-GitLabEditableUserName');
     this.userName.node.title = 'Click to edit user/organization';
     this._browser.toolbar.addItem('user', this.userName);
     this.userName.name.changed.connect(
       this._onUserChanged,
       this
     );
-    // Create a button that opens GitHub at the appropriate
+    // Create a button that opens GitLab at the appropriate
     // repo+directory.
-    this._openGitHubButton = new ToolbarButton({
+    this._openGitLabButton = new ToolbarButton({
       onClick: () => {
         let url = this._drive.baseUrl;
-        // If there is no valid user, open the GitHub homepage.
+        // If there is no valid user, open the GitLab homepage.
         if (!this._drive.validUser) {
           window.open(url);
           return;
@@ -72,11 +72,11 @@ export class GitHubFileBrowser extends Widget {
         }
         window.open(url);
       },
-      iconClassName: 'jp-GitHub-icon jp-Icon jp-Icon-16',
-      tooltip: 'Open this repository on GitHub'
+      iconClassName: 'jp-GitLab-icon jp-Icon jp-Icon-16',
+      tooltip: 'Open this repository on GitLab'
     });
-    this._openGitHubButton.addClass('jp-GitHub-toolbar-item');
-    this._browser.toolbar.addItem('GitHub', this._openGitHubButton);
+    this._openGitLabButton.addClass('jp-GitLab-toolbar-item');
+    this._browser.toolbar.addItem('GitLab', this._openGitLabButton);
 
     // Create a button the opens MyBinder to the appropriate repo.
     this._launchBinderButton = new ToolbarButton({
@@ -102,7 +102,7 @@ export class GitHubFileBrowser extends Widget {
       tooltip: 'Launch this repository on mybinder.org',
       iconClassName: 'jp-MyBinderButton jp-Icon jp-Icon-16'
     });
-    this._launchBinderButton.addClass('jp-GitHub-toolbar-item');
+    this._launchBinderButton.addClass('jp-GitLab-toolbar-item');
     this._browser.toolbar.addItem('binder', this._launchBinderButton);
 
     // Add our own refresh button, since the other one is hidden
@@ -114,7 +114,7 @@ export class GitHubFileBrowser extends Widget {
       },
       tooltip: 'Refresh File List'
     });
-    refresher.addClass('jp-GitHub-toolbar-item');
+    refresher.addClass('jp-GitLab-toolbar-item');
     this._browser.toolbar.addItem('gh-refresher', refresher);
 
     // Set up a listener to check if we can launch mybinder.
@@ -134,7 +134,7 @@ export class GitHubFileBrowser extends Widget {
   /**
    * An editable widget hosting the current user name.
    */
-  readonly userName: GitHubEditableName;
+  readonly userName: GitLabEditableName;
 
   /**
    * React to a change in user.
@@ -242,8 +242,8 @@ export class GitHubFileBrowser extends Widget {
 
     // If we are being rate limited, make an error panel.
     if (rateLimited) {
-      this._errorPanel = new GitHubErrorPanel(
-        'You have been rate limited by GitHub! ' +
+      this._errorPanel = new GitLabErrorPanel(
+        'You have been rate limited by GitLab! ' +
           'You will need to wait about an hour before ' +
           'continuing'
       );
@@ -256,8 +256,8 @@ export class GitHubFileBrowser extends Widget {
     if (!validUser) {
       const message = resource.user
         ? `"${resource.user}" appears to be an invalid user name!`
-        : 'Please enter a GitHub user name';
-      this._errorPanel = new GitHubErrorPanel(message);
+        : 'Please enter a GitLab user name';
+      this._errorPanel = new GitLabErrorPanel(message);
       const listing = (this._browser.layout as PanelLayout).widgets[2];
       listing.node.appendChild(this._errorPanel.node);
       return;
@@ -265,9 +265,9 @@ export class GitHubFileBrowser extends Widget {
   }
 
   private _browser: FileBrowser;
-  private _drive: GitHubDrive;
-  private _errorPanel: GitHubErrorPanel | null;
-  private _openGitHubButton: ToolbarButton;
+  private _drive: GitLabDrive;
+  private _errorPanel: GitLabErrorPanel | null;
+  private _openGitLabButton: ToolbarButton;
   private _launchBinderButton: ToolbarButton;
   private _binderActive = false;
   private _changeGuard = false;
@@ -275,17 +275,17 @@ export class GitHubFileBrowser extends Widget {
 
 /**
  * A widget that hosts an editable field,
- * used to host the currently active GitHub
+ * used to host the currently active GitLab
  * user name.
  */
-export class GitHubEditableName extends Widget {
+export class GitLabEditableName extends Widget {
   constructor(initialName: string = '', placeholder?: string) {
     super();
-    this.addClass('jp-GitHubEditableName');
+    this.addClass('jp-GitLabEditableName');
     this._nameNode = document.createElement('div');
-    this._nameNode.className = 'jp-GitHubEditableName-display';
+    this._nameNode.className = 'jp-GitLabEditableName-display';
     this._editNode = document.createElement('input');
-    this._editNode.className = 'jp-GitHubEditableName-input';
+    this._editNode.className = 'jp-GitLabEditableName-input';
 
     this._placeholder = placeholder || '<Edit Name>';
 
@@ -330,14 +330,14 @@ export class GitHubEditableName extends Widget {
  * used if there is an invalid user name or if we
  * are being rate-limited.
  */
-export class GitHubErrorPanel extends Widget {
+export class GitLabErrorPanel extends Widget {
   constructor(message: string) {
     super();
-    this.addClass('jp-GitHubErrorPanel');
+    this.addClass('jp-GitLabErrorPanel');
     const image = document.createElement('div');
     const text = document.createElement('div');
-    image.className = 'jp-GitHubErrorImage';
-    text.className = 'jp-GitHubErrorText';
+    image.className = 'jp-GitLabErrorImage';
+    text.className = 'jp-GitLabErrorText';
     text.textContent = message;
     this.node.appendChild(image);
     this.node.appendChild(text);

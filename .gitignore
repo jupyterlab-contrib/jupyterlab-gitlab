@@ -1,6 +1,6 @@
 *.bundle.*
 dist/
-jupyterlab_github.egg-info/
+jupyterlab_gitlab.egg-info/
 __pycache__/
 lib/
 test/build/*
@@ -11,3 +11,5 @@ node_modules/
 .ipynb_checkpoints/
 npm-debug.log
 package-lock.json
+.DS_Store
+*.swp

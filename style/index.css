@@ -3,25 +3,21 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-[data-theme-light='true'] .jp-GitHub-icon {
-  background-image: url(octocat-light.svg);
+.jp-GitLab-icon {
+  background-image: url(gitlab_stacked_wm_grayscale.svg);
 }
 
-[data-theme-light='false'] .jp-GitHub-icon {
-  background-image: url(octocat-dark.svg);
-}
-
-.jp-GitHubBrowser {
+.jp-GitLabBrowser {
   background-color: var(--jp-layout-color1);
   height: 100%;
 }
 
-.jp-GitHubBrowser .jp-FileBrowser {
+.jp-GitLabBrowser .jp-FileBrowser {
   flex-grow: 1;
   height: 100%;
 }
 
-.jp-GitHubBrowser .jp-GitHubEditableName {
+.jp-GitLabBrowser .jp-GitLabEditableName {
   overflow: hidden;
   white-space: nowrap;
   text-align: center;
@@ -30,16 +26,16 @@
   flex: 8 8;
 }
 
-.jp-GitHubBrowser .jp-GitHubEditableName-display {
+.jp-GitLabBrowser .jp-GitLabEditableName-display {
   border: 1px solid transparent;
   width: 100%;
 }
 
-.jp-GitHubBrowser .jp-GitHubEditableName-display:hover {
+.jp-GitLabBrowser .jp-GitLabEditableName-display:hover {
   border: 1px solid var(--jp-border-color1);
 }
 
-.jp-GitHubBrowser .jp-GitHubEditableName-input {
+.jp-GitLabBrowser .jp-GitLabEditableName-input {
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color1);
   font-size: large;
@@ -47,23 +43,23 @@
   width: 100%;
 }
 
-.jp-GitHubBrowser .jp-ToolbarButton.jp-Toolbar-item.jp-GitHub-toolbar-item {
+.jp-GitLabBrowser .jp-ToolbarButton.jp-Toolbar-item.jp-GitLab-toolbar-item {
   display: block;
 }
 
-.jp-GitHubBrowser .jp-ToolbarButton.jp-Toolbar-item {
+.jp-GitLabBrowser .jp-ToolbarButton.jp-Toolbar-item {
   display: none;
 }
 
-.jp-GitHubBrowser .jp-DirListing-headerItem.jp-id-modified {
+.jp-GitLabBrowser .jp-DirListing-headerItem.jp-id-modified {
   display: none;
 }
 
-.jp-GitHubBrowser .jp-DirListing-itemModified {
+.jp-GitLabBrowser .jp-DirListing-itemModified {
   display: none;
 }
 
-.jp-GitHubErrorPanel {
+.jp-GitLabErrorPanel {
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -77,29 +73,29 @@
   background: var(--jp-layout-color2);
 }
 
-.jp-GitHubErrorImage {
+.jp-GitLabErrorImage {
   background-size: 100%;
   width: 200px;
   height: 165px;
-  background-image: url(octocat_error.png);
+  background-image: url(gitlab-logo-extra-whitespace.svg);
 }
 
-.jp-GitHubErrorText {
+.jp-GitLabErrorText {
   font-size: var(--jp-ui-font-size3);
   color: var(--jp-ui-font-color1);
   text-align: center;
   padding: 12px;
 }
 
-.jp-GitHubBrowser .jp-MyBinderButton {
+.jp-GitLabBrowser .jp-MyBinderButton {
   background-image: url(binder.svg);
 }
 
-.jp-GitHubBrowser .jp-MyBinderButton-disabled {
+.jp-GitLabBrowser .jp-MyBinderButton-disabled {
   opacity: 0.3;
 }
 
-#setting-editor .jp-PluginList-icon.jp-GitHub-icon {
+#setting-editor .jp-PluginList-icon.jp-GitLab-icon {
   background-size: 85%;
   background-repeat: no-repeat;
   background-position: center;

@@ -6,7 +6,7 @@ notifications:
   email: false
 before_install:
   - cd ..
-  - git clone --depth=50 --branch=master https://github.com/jupyterlab/jupyterlab.git
+  - git clone --depth=50 --branch=master https://gitlab.com/jupyterlab/jupyterlab.git
   - cd jupyterlab
 install:
   - npm install --no-optional

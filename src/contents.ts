@@ -14,23 +14,23 @@ import { Contents, ServerConnection } from '@jupyterlab/services';
 import {
   browserApiRequest,
   proxiedApiRequest,
-  GitHubRepo,
-  GitHubContents,
-  GitHubBlob,
-  GitHubFileContents,
-  GitHubDirectoryListing
-} from './github';
+  GitLabRepo,
+  GitLabContents,
+  GitLabBlob,
+  GitLabFileContents,
+  GitLabDirectoryListing
+} from './gitlab';
 
 import * as base64js from 'base64-js';
 
-export const DEFAULT_GITHUB_API_URL = 'https://api.github.com';
-export const DEFAULT_GITHUB_BASE_URL = 'https://github.com';
+export const DEFAULT_GITLAB_API_URL = 'https://api.gitlab.com';
+export const DEFAULT_GITLAB_BASE_URL = 'https://gitlab.com';
 
 /**
  * A Contents.IDrive implementation that serves as a read-only
- * view onto GitHub repositories.
+ * view onto GitLab repositories.
  */
-export class GitHubDrive implements Contents.IDrive {
+export class GitLabDrive implements Contents.IDrive {
   /**
    * Construct a new drive object.
    *
@@ -43,23 +43,23 @@ export class GitHubDrive implements Contents.IDrive {
       return types.length === 0 ? registry.getFileType('text')! : types[0];
     };
 
-    this.baseUrl = DEFAULT_GITHUB_BASE_URL;
+    this.baseUrl = DEFAULT_GITLAB_BASE_URL;
 
     // Test an api request to the notebook server
     // to see if the server proxy is installed.
     // If so, use that. If not, warn the user and
     // use the client-side implementation.
     this._useProxy = new Promise<boolean>(resolve => {
-      const requestUrl = URLExt.join(this._serverSettings.baseUrl, 'github');
+      const requestUrl = URLExt.join(this._serverSettings.baseUrl, 'gitlab');
       proxiedApiRequest<any>(requestUrl, this._serverSettings)
         .then(() => {
           resolve(true);
         })
         .catch(() => {
           console.warn(
-            'The JupyterLab GitHub server extension appears ' +
+            'The JupyterLab GitLab server extension appears ' +
               'to be missing. If you do not install it with application ' +
-              'credentials, you are likely to be rate limited by GitHub ' +
+              'credentials, you are likely to be rate limited by GitLab ' +
               'very quickly'
           );
           resolve(false);
@@ -73,8 +73,8 @@ export class GitHubDrive implements Contents.IDrive {
   /**
    * The name of the drive.
    */
-  get name(): 'GitHub' {
-    return 'GitHub';
+  get name(): 'GitLab' {
+    return 'GitLab';
   }
 
   /**
@@ -90,7 +90,7 @@ export class GitHubDrive implements Contents.IDrive {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * State for whether the drive is being rate limited by GitHub.
+   * State for whether the drive is being rate limited by GitLab.
    */
   readonly rateLimitedState: ObservableValue;
 
@@ -120,28 +120,28 @@ export class GitHubDrive implements Contents.IDrive {
   }
 
   /**
-   * The GitHub base URL
+   * The GitLab base URL
    */
   get baseUrl(): string {
     return this._baseUrl;
   }
 
   /**
-   * The GitHub base URL is set by the settingsRegistry change hook
+   * The GitLab base URL is set by the settingsRegistry change hook
    */
   set baseUrl(url: string) {
     this._baseUrl = url;
   }
 
   /**
-   * The GitHub access token
+   * The GitLab access token
    */
   get accessToken(): string | null | undefined {
     return this._accessToken;
   }
 
   /**
-   * The GitHub access token is set by the settingsRegistry change hook
+   * The GitLab access token is set by the settingsRegistry change hook
    */
   set accessToken(token: string | null | undefined) {
     this._accessToken = token;
@@ -185,7 +185,7 @@ export class GitHubDrive implements Contents.IDrive {
         resource.path
       )
     );
-    return this._apiRequest<GitHubContents>(apiPath)
+    return this._apiRequest<GitLabContents>(apiPath)
       .then(contents => {
         // Set the states
         this._validUser = true;
@@ -193,7 +193,7 @@ export class GitHubDrive implements Contents.IDrive {
           this.rateLimitedState.set(false);
         }
 
-        return Private.gitHubContentsToJupyterContents(
+        return Private.gitLabContentsToJupyterContents(
           path,
           contents,
           this._fileTypeForPath
@@ -202,7 +202,7 @@ export class GitHubDrive implements Contents.IDrive {
       .catch((err: ServerConnection.ResponseError) => {
         if (err.response.status === 404) {
           console.warn(
-            'GitHub: cannot find org/repo. ' +
+            'GitLab: cannot find org/repo. ' +
               'Perhaps you misspelled something?'
           );
           this._validUser = false;
@@ -248,12 +248,12 @@ export class GitHubDrive implements Contents.IDrive {
     const resource = parsePath(path);
     // Error if the user has not been set
     if (!resource.user) {
-      return Promise.reject('GitHub: no active organization');
+      return Promise.reject('GitLab: no active organization');
     }
 
     // Error if there is no path.
     if (!resource.path) {
-      return Promise.reject('GitHub: No file selected');
+      return Promise.reject('GitLab: No file selected');
     }
 
     // Otherwise identify the repository and get the url of the
@@ -268,7 +268,7 @@ export class GitHubDrive implements Contents.IDrive {
         dirname
       )
     );
-    return this._apiRequest<GitHubDirectoryListing>(dirApiPath).then(
+    return this._apiRequest<GitLabDirectoryListing>(dirApiPath).then(
       dirContents => {
         for (let item of dirContents) {
           if (item.path === resource.path) {
@@ -400,10 +400,10 @@ export class GitHubDrive implements Contents.IDrive {
 
   /**
    * If a file is too large (> 1Mb), we need to access it over the
-   * GitHub Git Data API.
+   * GitLab Git Data API.
    */
   private _getBlob(path: string): Promise<Contents.IModel> {
-    let blobData: GitHubFileContents;
+    let blobData: GitLabFileContents;
     // Get the contents of the parent directory so that we can
     // get the sha of the blob.
     const resource = parsePath(path);
@@ -417,11 +417,11 @@ export class GitHubDrive implements Contents.IDrive {
         dirname
       )
     );
-    return this._apiRequest<GitHubDirectoryListing>(dirApiPath)
+    return this._apiRequest<GitLabDirectoryListing>(dirApiPath)
       .then(dirContents => {
         for (let item of dirContents) {
           if (item.path === resource.path) {
-            blobData = item as GitHubFileContents;
+            blobData = item as GitLabFileContents;
             return item.sha;
           }
         }
@@ -439,12 +439,12 @@ export class GitHubDrive implements Contents.IDrive {
             sha
           )
         );
-        return this._apiRequest<GitHubBlob>(blobApiPath);
+        return this._apiRequest<GitLabBlob>(blobApiPath);
       })
       .then(blob => {
         // Convert the data to a Contents.IModel.
         blobData.content = blob.content;
-        return Private.gitHubContentsToJupyterContents(
+        return Private.gitLabContentsToJupyterContents(
           path,
           blobData,
           this._fileTypeForPath
@@ -460,7 +460,7 @@ export class GitHubDrive implements Contents.IDrive {
     // If will return with an error if not, and we can try
     // the user path.
     const apiPath = URLExt.encodeParts(URLExt.join('orgs', user, 'repos'));
-    return this._apiRequest<GitHubRepo[]>(apiPath)
+    return this._apiRequest<GitLabRepo[]>(apiPath)
       .catch(err => {
         // If we can't find the org, it may be a user.
         if (err.response.status === 404) {
@@ -477,7 +477,7 @@ export class GitHubDrive implements Contents.IDrive {
                   URLExt.join('users', user, 'repos')
                 );
               }
-              return this._apiRequest<GitHubRepo[]>(reposPath);
+              return this._apiRequest<GitLabRepo[]>(reposPath);
             })
             .catch(err => {
               // If there is no authenticated user, return the public
@@ -486,7 +486,7 @@ export class GitHubDrive implements Contents.IDrive {
                 const reposPath = URLExt.encodeParts(
                   URLExt.join('users', user, 'repos')
                 );
-                return this._apiRequest<GitHubRepo[]>(reposPath);
+                return this._apiRequest<GitLabRepo[]>(reposPath);
               }
               throw err;
             });
@@ -512,7 +512,7 @@ export class GitHubDrive implements Contents.IDrive {
         } else {
           console.error(err.message);
           console.warn(
-            'GitHub: cannot find user. ' + 'Perhaps you misspelled something?'
+            'GitLab: cannot find user. ' + 'Perhaps you misspelled something?'
           );
           this._validUser = false;
         }
@@ -538,13 +538,13 @@ export class GitHubDrive implements Contents.IDrive {
       }
       let requestUrl: string;
       if (result === true) {
-        requestUrl = URLExt.join(this._serverSettings.baseUrl, 'github');
+        requestUrl = URLExt.join(this._serverSettings.baseUrl, 'gitlab');
         // add the access token if defined
         if (this.accessToken) {
           params['access_token'] = this.accessToken;
         }
       } else {
-        requestUrl = DEFAULT_GITHUB_API_URL;
+        requestUrl = DEFAULT_GITLAB_API_URL;
       }
       if (path) {
         requestUrl = URLExt.join(requestUrl, path);
@@ -574,7 +574,7 @@ export class GitHubDrive implements Contents.IDrive {
 /**
  * Specification for a file in a repository.
  */
-export interface IGitHubResource {
+export interface IGitLabResource {
   /**
    * The user or organization for the resource.
    */
@@ -592,9 +592,9 @@ export interface IGitHubResource {
 }
 
 /**
- * Parse a path into a IGitHubResource.
+ * Parse a path into a IGitLabResource.
  */
-export function parsePath(path: string): IGitHubResource {
+export function parsePath(path: string): IGitLabResource {
   const parts = path.split('/');
   const user = parts.length > 0 ? parts[0] : '';
   const repository = parts.length > 1 ? parts[1] : '';
@@ -623,12 +623,12 @@ namespace Private {
   };
 
   /**
-   * Given a JSON GitHubContents object returned by the GitHub API v3,
+   * Given a JSON GitLabContents object returned by the GitLab API v3,
    * convert it to the Jupyter Contents.IModel.
    *
    * @param path - the path to the contents model in the repository.
    *
-   * @param contents - the GitHubContents object.
+   * @param contents - the GitLabContents object.
    *
    * @param fileTypeForPath - a function that, given a path, returns
    *   a DocumentRegistry.IFileType, used by JupyterLab to identify different
@@ -636,13 +636,13 @@ namespace Private {
    *
    * @returns a Contents.IModel object.
    */
-  export function gitHubContentsToJupyterContents(
+  export function gitLabContentsToJupyterContents(
     path: string,
-    contents: GitHubContents | GitHubContents[],
+    contents: GitLabContents | GitLabContents[],
     fileTypeForPath: (path: string) => DocumentRegistry.IFileType
   ): Contents.IModel {
     if (Array.isArray(contents)) {
-      // If we have an array, it is a directory of GitHubContents.
+      // If we have an array, it is a directory of GitLabContents.
       // Iterate over that and convert all of the items in the array/
       return {
         name: PathExt.basename(path),
@@ -654,7 +654,7 @@ namespace Private {
         last_modified: '',
         mimetype: '',
         content: contents.map(c => {
-          return gitHubContentsToJupyterContents(
+          return gitLabContentsToJupyterContents(
             PathExt.join(path, c.name),
             c,
             fileTypeForPath
@@ -664,7 +664,7 @@ namespace Private {
     } else if (contents.type === 'file' || contents.type === 'symlink') {
       // If it is a file or blob, convert to a file
       const fileType = fileTypeForPath(path);
-      const fileContents = (contents as GitHubFileContents).content;
+      const fileContents = (contents as GitLabFileContents).content;
       let content: any;
       switch (fileType.fileFormat) {
         case 'text':
@@ -713,7 +713,7 @@ namespace Private {
       // If it is a submodule, throw an error, since we cannot
       // GET submodules at the moment. NOTE: due to a bug in the GithHub
       // API, the `type` for submodules in a directory listing is incorrectly
-      // reported as `file`: https://github.com/github/developer.github.com/commit/1b329b04cece9f3087faa7b1e0382317a9b93490
+      // reported as `file`: https://gitlab.com/gitlab/developer.gitlab.com/commit/1b329b04cece9f3087faa7b1e0382317a9b93490
       // This means submodules will show up in the listing, but we still should not
       // open them.
       throw makeError(
@@ -729,15 +729,15 @@ namespace Private {
   }
 
   /**
-   * Given an array of JSON GitHubRepo objects returned by the GitHub API v3,
+   * Given an array of JSON GitLabRepo objects returned by the GitLab API v3,
    * convert it to the Jupyter Contents.IModel conforming to a directory of
    * those repositories.
    *
-   * @param repo - the GitHubRepo object.
+   * @param repo - the GitLabRepo object.
    *
    * @returns a Contents.IModel object.
    */
-  export function reposToDirectory(repos: GitHubRepo[]): Contents.IModel {
+  export function reposToDirectory(repos: GitLabRepo[]): Contents.IModel {
     // If it is a directory, convert to that.
     let content: Contents.IModel[] = repos.map(repo => {
       return {

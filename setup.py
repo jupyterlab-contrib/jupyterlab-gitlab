@@ -1,5 +1,5 @@
 """
-Setup module for the jupyterlab_github proxy extension
+Setup module for the jupyterlab_gitlab proxy extension
 """
 import setuptools
 from setupbase import (
@@ -8,14 +8,14 @@ from setupbase import (
 
 data_files_spec = [
     ('etc/jupyter/jupyter_notebook_config.d',
-     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_github.json'),
+     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_gitlab.json'),
 ]
 
 cmdclass = create_cmdclass(data_files_spec=data_files_spec)
 
 setup_dict = dict(
-    name='jupyterlab_github',
-    description='A Jupyter Notebook server extension which acts a proxy for the GitHub API.',
+    name='jupyterlab_gitlab',
+    description='A Jupyter Notebook server extension which acts a proxy for the GitLab API.',
     packages=find_packages(),
     cmdclass=cmdclass,
     author          = 'Jupyter Development Team',
@@ -23,7 +23,7 @@ setup_dict = dict(
     url             = 'http://jupyter.org',
     license         = 'BSD',
     platforms       = "Linux, Mac OS X, Windows",
-    keywords        = ['Jupyter', 'JupyterLab', 'GitHub'],
+    keywords        = ['Jupyter', 'JupyterLab', 'GitLab'],
     python_requires = '>=3.5',
     classifiers     = [
         'Intended Audience :: Developers',
@@ -47,7 +47,7 @@ except ValueError as e:
                           setup_dict["python_requires"])
                      )
 
-from jupyterlab_github import __version__
+from jupyterlab_gitlab import __version__
 
 setuptools.setup(
     version=__version__,

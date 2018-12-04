@@ -4,9 +4,9 @@
 import { ServerConnection } from '@jupyterlab/services';
 
 /**
- * Make a client-side request to the GitHub API.
+ * Make a client-side request to the GitLab API.
  *
- * @param url - the api path for the GitHub API v3
+ * @param url - the api path for the GitLab API v3
  *   (not including the base url).
  *
  * @returns a Promise resolved with the JSON response.
@@ -24,9 +24,9 @@ export function browserApiRequest<T>(url: string): Promise<T> {
 
 /**
  * Make a request to the notebook server proxy for the
- * GitHub API.
+ * GitLab API.
  *
- * @param url - the api path for the GitHub API v3
+ * @param url - the api path for the GitLab API v3
  *   (not including the base url)
  *
  * @param settings - the settings for the current notebook server.
@@ -48,10 +48,10 @@ export function proxiedApiRequest<T>(
 }
 
 /**
- * Typings representing contents from the GitHub API v3.
- * Cf: https://developer.github.com/v3/repos/contents/
+ * Typings representing contents from the GitLab API v3.
+ * Cf: https://developer.gitlab.com/v3/repos/contents/
  */
-export class GitHubContents {
+export class GitLabContents {
   /**
    * The type of the file.
    */
@@ -78,7 +78,7 @@ export class GitHubContents {
   sha: string;
 
   /**
-   * The URL for the file in the GitHub API.
+   * The URL for the file in the GitLab API.
    */
   url: string;
 
@@ -89,7 +89,7 @@ export class GitHubContents {
   git_url: string;
 
   /**
-   * The URL for the file in the GitHub UI.
+   * The URL for the file in the GitLab UI.
    */
   // tslint:disable-next-line
   html_url: string;
@@ -113,10 +113,10 @@ export class GitHubContents {
 }
 
 /**
- * Typings representing file contents from the GitHub API v3.
- * Cf: https://developer.github.com/v3/repos/contents/#response-if-content-is-a-file
+ * Typings representing file contents from the GitLab API v3.
+ * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-file
  */
-export class GitHubFileContents extends GitHubContents {
+export class GitLabFileContents extends GitLabContents {
   /**
    * The type of the contents.
    */
@@ -134,9 +134,9 @@ export class GitHubFileContents extends GitHubContents {
 }
 
 /**
- * Typings representing a directory from the GitHub API v3.
+ * Typings representing a directory from the GitLab API v3.
  */
-export class GitHubDirectoryContents extends GitHubContents {
+export class GitLabDirectoryContents extends GitLabContents {
   /**
    * The type of the contents.
    */
@@ -144,10 +144,10 @@ export class GitHubDirectoryContents extends GitHubContents {
 }
 
 /**
- * Typings representing a blob from the GitHub API v3.
- * Cf: https://developer.github.com/v3/git/blobs/#response
+ * Typings representing a blob from the GitLab API v3.
+ * Cf: https://developer.gitlab.com/v3/git/blobs/#response
  */
-export class GitHubBlob {
+export class GitLabBlob {
   /**
    * The base64-encoded contents of the file.
    */
@@ -175,10 +175,10 @@ export class GitHubBlob {
 }
 
 /**
- * Typings representing symlink contents from the GitHub API v3.
- * Cf: https://developer.github.com/v3/repos/contents/#response-if-content-is-a-symlink
+ * Typings representing symlink contents from the GitLab API v3.
+ * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-symlink
  */
-export class GitHubSymlinkContents extends GitHubContents {
+export class GitLabSymlinkContents extends GitLabContents {
   /**
    * The type of the contents.
    */
@@ -186,10 +186,10 @@ export class GitHubSymlinkContents extends GitHubContents {
 }
 
 /**
- * Typings representing submodule contents from the GitHub API v3.
- * Cf: https://developer.github.com/v3/repos/contents/#response-if-content-is-a-submodule
+ * Typings representing submodule contents from the GitLab API v3.
+ * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-submodule
  */
-export class GitHubSubmoduleContents extends GitHubContents {
+export class GitLabSubmoduleContents extends GitLabContents {
   /**
    * The type of the contents.
    */
@@ -197,19 +197,19 @@ export class GitHubSubmoduleContents extends GitHubContents {
 }
 
 /**
- * Typings representing directory contents from the GitHub API v3.
- * Cf: https://developer.github.com/v3/repos/contents/#response-if-content-is-a-directory
+ * Typings representing directory contents from the GitLab API v3.
+ * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-directory
  */
-export type GitHubDirectoryListing = GitHubContents[];
+export type GitLabDirectoryListing = GitLabContents[];
 
 /**
- * Typings representing repositories from the GitHub API v3.
- * Cf: https://developer.github.com/v3/repos/#list-organization-repositories
+ * Typings representing repositories from the GitLab API v3.
+ * Cf: https://developer.gitlab.com/v3/repos/#list-organization-repositories
  *
  * #### Notes
  *   This is incomplete.
  */
-export class GitHubRepo {
+export class GitLabRepo {
   /**
    * ID for the repository.
    */
@@ -247,12 +247,12 @@ export class GitHubRepo {
   fork: boolean;
 
   /**
-   * The URL for the repository in the GitHub API.
+   * The URL for the repository in the GitLab API.
    */
   url: string;
 
   /**
-   * The URL for the repository in the GitHub UI.
+   * The URL for the repository in the GitLab UI.
    */
   // tslint:disable-next-line
   html_url: string;

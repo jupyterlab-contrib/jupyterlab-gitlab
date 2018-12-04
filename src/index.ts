@@ -15,24 +15,24 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
-import { GitHubDrive, DEFAULT_GITHUB_BASE_URL } from './contents';
+import { GitLabDrive, DEFAULT_GITLAB_BASE_URL } from './contents';
 
-import { GitHubFileBrowser } from './browser';
+import { GitLabFileBrowser } from './browser';
 
 import '../style/index.css';
 
 /**
- * GitHub filebrowser plugin state namespace.
+ * GitLab filebrowser plugin state namespace.
  */
-const NAMESPACE = 'github-filebrowser';
+const NAMESPACE = 'gitlab-filebrowser';
 
 /**
  * The ID for the plugin.
  */
-const PLUGIN_ID = '@jupyterlab/github:drive';
+const PLUGIN_ID = '@jupyterlab/gitlab:drive';
 
 /**
- * The JupyterLab plugin for the GitHub Filebrowser.
+ * The JupyterLab plugin for the GitLab Filebrowser.
  */
 const fileBrowserPlugin: JupyterLabPlugin<void> = {
   id: PLUGIN_ID,
@@ -58,11 +58,11 @@ function activateFileBrowser(
 ): void {
   const { commands } = app;
 
-  // Add the GitHub backend to the contents manager.
-  const drive = new GitHubDrive(app.docRegistry);
+  // Add the GitLab backend to the contents manager.
+  const drive = new GitLabDrive(app.docRegistry);
   manager.services.contents.addDrive(drive);
 
-  // Create the embedded filebrowser. GitHub repos likely
+  // Create the embedded filebrowser. GitLab repos likely
   // don't need as often of a refresh interval as normal ones,
   // and rate-limiting can be an issue, so we give a 5 minute
   // refresh interval.
@@ -72,16 +72,16 @@ function activateFileBrowser(
     refreshInterval: 300000
   });
 
-  const gitHubBrowser = new GitHubFileBrowser(browser, drive);
+  const gitLabBrowser = new GitLabFileBrowser(browser, drive);
 
-  gitHubBrowser.title.iconClass = 'jp-GitHub-icon jp-SideBar-tabIcon';
-  gitHubBrowser.title.caption = 'Browse GitHub';
+  gitLabBrowser.title.iconClass = 'jp-GitLab-icon jp-SideBar-tabIcon';
+  gitLabBrowser.title.caption = 'Browse GitLab';
 
-  gitHubBrowser.id = 'github-file-browser';
+  gitLabBrowser.id = 'gitlab-file-browser';
 
   // Add the file browser widget to the application restorer.
-  restorer.add(gitHubBrowser, NAMESPACE);
-  app.shell.addToLeftArea(gitHubBrowser, { rank: 102 });
+  restorer.add(gitLabBrowser, NAMESPACE);
+  app.shell.addToLeftArea(gitLabBrowser, { rank: 102 });
 
   let shouldWarn = false;
   const onSettingsUpdated = async (settings: ISettingRegistry.ISettings) => {
@@ -93,7 +93,7 @@ function activateFileBrowser(
       | string
       | null
       | undefined;
-    drive.baseUrl = baseUrl || DEFAULT_GITHUB_BASE_URL;
+    drive.baseUrl = baseUrl || DEFAULT_GITLAB_BASE_URL;
     if (accessToken) {
       let proceed = true;
       if (shouldWarn) {

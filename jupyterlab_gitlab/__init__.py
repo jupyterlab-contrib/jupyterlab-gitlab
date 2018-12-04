@@ -16,9 +16,9 @@ __version__ = '0.7.0'
 link_regex = re.compile(r'<([^>]*)>;\s*rel="([\w]*)\"')
 
 
-class GitHubConfig(Configurable):
+class GitLabConfig(Configurable):
     """
-    Allows configuration of access to the GitHub api
+    Allows configuration of access to the GitLab api
     """
     allow_client_side_access_token = Bool(
         False, config=True,
@@ -30,37 +30,37 @@ class GitHubConfig(Configurable):
         )
     )
     api_url = Unicode(
-        'https://api.github.com', config=True,
-        help="The url for the GitHub api"
+        'https://api.gitlab.com', config=True,
+        help="The url for the GitLab api"
     )
     access_token = Unicode(
         '', config=True,
         help=(
-            "A personal access token for GitHub. If specified it takes "
+            "A personal access token for GitLab. If specified it takes "
             "precedence over the `client_id` and `client_secret`"
         )
     )
     client_id = Unicode(
         '', config=True,
-        help="The Client ID for the GitHub OAuth app"
+        help="The Client ID for the GitLab OAuth app"
     )
     client_secret = Unicode(
         '', config=True,
-        help="The Client secret for the GitHub OAuth app"
+        help="The Client secret for the GitLab OAuth app"
     )
     validate_cert = Bool(
         True, config=True,
         help=(
             "Whether to validate the servers' SSL certificate on requests "
-            "made to the GitHub api. In general this is a bad idea so only "
+            "made to the GitLab api. In general this is a bad idea so only "
             "disable SSL validation if you know what you are doing!"
         )
     )
 
 
-class GitHubHandler(APIHandler):
+class GitLabHandler(APIHandler):
     """
-    A proxy for the GitHub API v3.
+    A proxy for the GitLab API v3.
 
     The purpose of this proxy is to provide authentication to the API requests
     which allows for a higher rate limit. Without this, the rate limit on
@@ -69,12 +69,12 @@ class GitHubHandler(APIHandler):
     @gen.coroutine
     def get(self, path):
         """
-        Proxy API requests to GitHub, adding authentication parameter(s) if
+        Proxy API requests to GitLab, adding authentication parameter(s) if
         they have been set.
         """
 
         # Get access to the notebook config object
-        c = GitHubConfig(config=self.config)
+        c = GitLabConfig(config=self.config)
         try:
             query = self.request.query_arguments
             params = {key: query[key][0].decode() for key in query}
@@ -90,7 +90,7 @@ class GitHubHandler(APIHandler):
                     "disabled for security reasons.\nPlease remove your "
                     "access token from JupyterLab and instead add it to "
                     "your notebook configuration file:\n"
-                    "c.GitHubConfig.access_token = '<TOKEN>'\n"
+                    "c.GitLabConfig.access_token = '<TOKEN>'\n"
                 )
                 raise HTTPError(403, msg)
             elif c.access_token != '':
@@ -105,7 +105,7 @@ class GitHubHandler(APIHandler):
             client = AsyncHTTPClient()
             request = HTTPRequest(
                 api_path, validate_cert=c.validate_cert,
-                user_agent='JupyterLab GitHub'
+                user_agent='JupyterLab GitLab'
             )
             response = yield client.fetch(request)
             data = json.loads(response.body.decode('utf-8'))
@@ -145,7 +145,7 @@ class GitHubHandler(APIHandler):
 
 def _jupyter_server_extension_paths():
     return [{
-        'module': 'jupyterlab_github'
+        'module': 'jupyterlab_gitlab'
     }]
 
 def load_jupyter_server_extension(nb_server_app):
@@ -157,6 +157,6 @@ def load_jupyter_server_extension(nb_server_app):
     """
     web_app = nb_server_app.web_app
     base_url = web_app.settings['base_url']
-    endpoint = url_path_join(base_url, 'github')
-    handlers = [(endpoint + "(.*)", GitHubHandler)]
+    endpoint = url_path_join(base_url, 'gitlab')
+    handlers = [(endpoint + "(.*)", GitLabHandler)]
     web_app.add_handlers('.*$', handlers)
