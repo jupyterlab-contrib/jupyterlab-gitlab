@@ -87,14 +87,6 @@
   padding: 12px;
 }
 
-.jp-GitLabBrowser .jp-MyBinderButton {
-  background-image: url(binder.svg);
-}
-
-.jp-GitLabBrowser .jp-MyBinderButton-disabled {
-  opacity: 0.3;
-}
-
 #setting-editor .jp-PluginList-icon.jp-GitLab-icon {
   background-size: 85%;
   background-repeat: no-repeat;

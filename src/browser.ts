@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { find } from '@phosphor/algorithm';
-
 import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import { ToolbarButton } from '@jupyterlab/apputils';
@@ -14,16 +12,6 @@ import { FileBrowser } from '@jupyterlab/filebrowser';
 import { ObservableValue } from '@jupyterlab/observables';
 
 import { GitLabDrive, parsePath } from './contents';
-
-/**
- * The base url for a mybinder deployment.
- */
-const MY_BINDER_BASE_URL = 'https://mybinder.org/v2/gh';
-
-/**
- * The className for disabling the mybinder button.
- */
-const MY_BINDER_DISABLED = 'jp-MyBinderButton-disabled';
 
 /**
  * Widget for hosting the GitLab filebrowser.
@@ -78,33 +66,6 @@ export class GitLabFileBrowser extends Widget {
     this._openGitLabButton.addClass('jp-GitLab-toolbar-item');
     this._browser.toolbar.addItem('GitLab', this._openGitLabButton);
 
-    // Create a button the opens MyBinder to the appropriate repo.
-    this._launchBinderButton = new ToolbarButton({
-      onClick: () => {
-        // If binder is not active for this directory, do nothing.
-        if (!this._binderActive) {
-          return;
-        }
-        const localPath = this._browser.model.manager.services.contents.localPath(
-          this._browser.model.path
-        );
-        const resource = parsePath(localPath);
-        const url = URLExt.join(
-          MY_BINDER_BASE_URL,
-          resource.user,
-          resource.repository,
-          'master'
-        );
-        // Attempt to open using the JupyterLab tree handler
-        const tree = URLExt.join('lab', 'tree', resource.path);
-        window.open(url + `?urlpath=${tree}`);
-      },
-      tooltip: 'Launch this repository on mybinder.org',
-      iconClassName: 'jp-MyBinderButton jp-Icon jp-Icon-16'
-    });
-    this._launchBinderButton.addClass('jp-GitLab-toolbar-item');
-    this._browser.toolbar.addItem('binder', this._launchBinderButton);
-
     // Add our own refresh button, since the other one is hidden
     // via CSS.
     let refresher = new ToolbarButton({
@@ -117,12 +78,12 @@ export class GitLabFileBrowser extends Widget {
     refresher.addClass('jp-GitLab-toolbar-item');
     this._browser.toolbar.addItem('gh-refresher', refresher);
 
-    // Set up a listener to check if we can launch mybinder.
+    // Set up a listener to check the username.
     this._browser.model.pathChanged.connect(
       this._onPathChanged,
       this
     );
-    // Trigger an initial pathChanged to check for binder state.
+    // Trigger an initial pathChanged to check for the username.
     this._onPathChanged();
 
     this._drive.rateLimitedState.changed.connect(
@@ -178,46 +139,6 @@ export class GitLabFileBrowser extends Widget {
       this._updateErrorPanel();
     }
 
-    // Check for a valid user.
-    if (!this._drive.validUser) {
-      this._launchBinderButton.addClass(MY_BINDER_DISABLED);
-      this._binderActive = false;
-      return;
-    }
-    // Check for a valid repo.
-    if (!resource.repository) {
-      this._launchBinderButton.addClass(MY_BINDER_DISABLED);
-      this._binderActive = false;
-      return;
-    }
-    // If we are in the root of the repository, check for one of
-    // the special files indicating we can launch the repository on mybinder.
-    // TODO: If the user navigates to a subdirectory without hitting the root
-    // of the repository, we will not check for whether the repo is binder-able.
-    // Figure out some way around this.
-    if (resource.path === '') {
-      const item = find(this._browser.model.items(), i => {
-        return (
-          i.name === 'requirements.txt' ||
-          i.name === 'environment.yml' ||
-          i.name === 'apt.txt' ||
-          i.name === 'REQUIRE' ||
-          i.name === 'Dockerfile' ||
-          (i.name === 'binder' && i.type === 'directory')
-        );
-      });
-      if (item) {
-        this._launchBinderButton.removeClass(MY_BINDER_DISABLED);
-        this._binderActive = true;
-        return;
-      } else {
-        this._launchBinderButton.addClass(MY_BINDER_DISABLED);
-        this._binderActive = false;
-        return;
-      }
-    }
-    // If we got this far, we are in a subdirectory of a valid
-    // repository, and should not change the binderActive status.
     return;
   }
 
@@ -268,8 +189,6 @@ export class GitLabFileBrowser extends Widget {
   private _drive: GitLabDrive;
   private _errorPanel: GitLabErrorPanel | null;
   private _openGitLabButton: ToolbarButton;
-  private _launchBinderButton: ToolbarButton;
-  private _binderActive = false;
   private _changeGuard = false;
 }
 
