@@ -23,7 +23,6 @@ import {
 
 import * as base64js from 'base64-js';
 
-export const DEFAULT_GITLAB_API_URL = 'https://api.gitlab.com';
 export const DEFAULT_GITLAB_BASE_URL = 'https://gitlab.com';
 
 /**
@@ -50,7 +49,16 @@ export class GitLabDrive implements Contents.IDrive {
     // If so, use that. If not, warn the user and
     // use the client-side implementation.
     this._useProxy = new Promise<boolean>(resolve => {
-      const requestUrl = URLExt.join(this._serverSettings.baseUrl, 'gitlab');
+      // GET /templates/licenses
+      // https://docs.gitlab.com/ee/api/templates/licenses.html
+      // GET /version requires an authenticated user
+      // https://docs.gitlab.com/ee/api/version.html
+      const requestUrl = URLExt.join(
+        this._serverSettings.baseUrl,
+        'gitlab',
+        'templates',
+        'licenses'
+      );
       proxiedApiRequest<any>(requestUrl, this._serverSettings)
         .then(() => {
           resolve(true);
@@ -168,22 +176,48 @@ export class GitLabDrive implements Contents.IDrive {
       return Promise.resolve(Private.dummyDirectory);
     }
 
-    // If the org has been set and the path is empty, list
-    // the repositories for the org.
+    // If the group has been set and the path is empty, list
+    // the repositories for the group.
     if (resource.user && !resource.repository) {
       return this._listRepos(resource.user);
     }
 
-    // Otherwise identify the repository and get the contents of the
-    // appropriate resource.
-    const apiPath = URLExt.encodeParts(
-      URLExt.join(
-        'repos',
-        resource.user,
-        resource.repository,
-        'contents',
-        resource.path
-      )
+    // If no path is given, get a list of files and directories
+    // at the root of the project
+    // https://docs.gitlab.com/ee/api/repositories.html#list-repository-tree
+    // GET /projects/:id/repository/tree
+    let endUrl = 'tree';
+    // Otherwise check if we want to retrieve a file or directory content
+    if (resource.path) {
+      if (options && options.type === 'file') {
+        // Get file from repository
+        // https://docs.gitlab.com/ee/api/repository_files.html#get-file-from-repository
+        // GET /projects/:id/repository/files/:file_path
+        // Note that:
+        // - we can't use GET /projects/:id/repository/tree?path=file_path (it returns 200 with an empty [])
+        // - ref is required and hard coded to master
+        endUrl =
+          URLExt.join('files', encodeURIComponent(resource.path)) +
+          '?ref=master';
+      } else {
+        // Get a list of repository files and directories in the project
+        // https://docs.gitlab.com/ee/api/repositories.html#list-repository-tree
+        // GET /projects/:id/repository/tree?path=path
+        endUrl = URLExt.join(
+          'tree',
+          '?path=' + encodeURIComponent(resource.path)
+        );
+      }
+    }
+    // Use namespaced API calls: resource.user + '%2F' + resource.repository
+    // See https://docs.gitlab.com/ee/api/README.html#namespaced-path-encoding
+    const apiPath = URLExt.join(
+      'projects',
+      encodeURIComponent(resource.user) +
+        '%2F' +
+        encodeURIComponent(resource.repository),
+      'repository',
+      endUrl
     );
     return this._apiRequest<GitLabContents>(apiPath)
       .then(contents => {
@@ -202,7 +236,7 @@ export class GitLabDrive implements Contents.IDrive {
       .catch((err: ServerConnection.ResponseError) => {
         if (err.response.status === 404) {
           console.warn(
-            'GitLab: cannot find org/repo. ' +
+            'GitLab: cannot find group/repo. ' +
               'Perhaps you misspelled something?'
           );
           this._validUser = false;
@@ -248,7 +282,7 @@ export class GitLabDrive implements Contents.IDrive {
     const resource = parsePath(path);
     // Error if the user has not been set
     if (!resource.user) {
-      return Promise.reject('GitLab: no active organization');
+      return Promise.reject('GitLab: no active group');
     }
 
     // Error if there is no path.
@@ -410,11 +444,11 @@ export class GitLabDrive implements Contents.IDrive {
     const dirname = PathExt.dirname(resource.path);
     const dirApiPath = URLExt.encodeParts(
       URLExt.join(
-        'repos',
-        resource.user,
+        'projects',
         resource.repository,
-        'contents',
-        dirname
+        'repository',
+        'tree',
+        '?path=' + dirname
       )
     );
     return this._apiRequest<GitLabDirectoryListing>(dirApiPath)
@@ -431,10 +465,9 @@ export class GitLabDrive implements Contents.IDrive {
         // Once we have the sha, form the api url and make the request.
         const blobApiPath = URLExt.encodeParts(
           URLExt.join(
-            'repos',
-            resource.user,
+            'projects',
             resource.repository,
-            'git',
+            'repository',
             'blobs',
             sha
           )
@@ -456,10 +489,10 @@ export class GitLabDrive implements Contents.IDrive {
    * List the repositories for the currently active user.
    */
   private _listRepos(user: string): Promise<Contents.IModel> {
-    // First, check if the `user` string is actually an org.
-    // If will return with an error if not, and we can try
+    // First, check if the `user` string is actually an group.
+    // It will return with an error if not, and we can try
     // the user path.
-    const apiPath = URLExt.encodeParts(URLExt.join('orgs', user, 'repos'));
+    const apiPath = URLExt.encodeParts(URLExt.join('groups', user, 'projects'));
     return this._apiRequest<GitLabRepo[]>(apiPath)
       .catch(err => {
         // If we can't find the org, it may be a user.
@@ -471,10 +504,10 @@ export class GitLabDrive implements Contents.IDrive {
               // If we are looking at the currently authenticated user,
               // get all the repositories they own, which includes private ones.
               if (currentUser.login === user) {
-                reposPath = 'user/repos?type=owner';
+                reposPath = 'projects?owned=true';
               } else {
                 reposPath = URLExt.encodeParts(
-                  URLExt.join('users', user, 'repos')
+                  URLExt.join('users', user, 'projects')
                 );
               }
               return this._apiRequest<GitLabRepo[]>(reposPath);
@@ -484,7 +517,7 @@ export class GitLabDrive implements Contents.IDrive {
               // users api path.
               if (err.response.status === 401) {
                 const reposPath = URLExt.encodeParts(
-                  URLExt.join('users', user, 'repos')
+                  URLExt.join('users', user, 'projects')
                 );
                 return this._apiRequest<GitLabRepo[]>(reposPath);
               }
@@ -544,7 +577,7 @@ export class GitLabDrive implements Contents.IDrive {
           params['access_token'] = this.accessToken;
         }
       } else {
-        requestUrl = DEFAULT_GITLAB_API_URL;
+        requestUrl = URLExt.join(this.baseUrl, 'api', 'v4');
       }
       if (path) {
         requestUrl = URLExt.join(requestUrl, path);
@@ -576,12 +609,12 @@ export class GitLabDrive implements Contents.IDrive {
  */
 export interface IGitLabResource {
   /**
-   * The user or organization for the resource.
+   * The user or group for the resource.
    */
   readonly user: string;
 
   /**
-   * The repository in the organization/user.
+   * The repository in the group/user.
    */
   readonly repository: string;
 
@@ -661,7 +694,12 @@ namespace Private {
           );
         })
       } as Contents.IModel;
-    } else if (contents.type === 'file' || contents.type === 'symlink') {
+    } else if (
+      contents.type === 'file' ||
+      contents.type === 'symlink' ||
+      contents.type === 'blob' ||
+      contents.hasOwnProperty('file_name')
+    ) {
       // If it is a file or blob, convert to a file
       const fileType = fileTypeForPath(path);
       const fileContents = (contents as GitLabFileContents).content;
@@ -696,7 +734,7 @@ namespace Private {
         mimetype: fileType.mimeTypes[0],
         content
       };
-    } else if (contents.type === 'dir') {
+    } else if (contents.type === 'dir' || contents.type == 'tree') {
       // If it is a directory, convert to that.
       return {
         name: PathExt.basename(path),

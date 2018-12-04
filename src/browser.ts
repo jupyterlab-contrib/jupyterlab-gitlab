@@ -28,7 +28,7 @@ export class GitLabFileBrowser extends Widget {
     // Create an editable name for the user/org name.
     this.userName = new GitLabEditableName('', '<Edit User>');
     this.userName.addClass('jp-GitLabEditableUserName');
-    this.userName.node.title = 'Click to edit user/organization';
+    this.userName.node.title = 'Click to edit user/group';
     this._browser.toolbar.addItem('user', this.userName);
     this.userName.name.changed.connect(
       this._onUserChanged,

@@ -6,7 +6,7 @@ import { ServerConnection } from '@jupyterlab/services';
 /**
  * Make a client-side request to the GitLab API.
  *
- * @param url - the api path for the GitLab API v3
+ * @param url - the api path for the GitLab API v4
  *   (not including the base url).
  *
  * @returns a Promise resolved with the JSON response.
@@ -26,7 +26,7 @@ export function browserApiRequest<T>(url: string): Promise<T> {
  * Make a request to the notebook server proxy for the
  * GitLab API.
  *
- * @param url - the api path for the GitLab API v3
+ * @param url - the api path for the GitLab API v4
  *   (not including the base url)
  *
  * @param settings - the settings for the current notebook server.
@@ -48,14 +48,19 @@ export function proxiedApiRequest<T>(
 }
 
 /**
- * Typings representing contents from the GitLab API v3.
- * Cf: https://developer.gitlab.com/v3/repos/contents/
+ * Typings representing contents from the GitLab API v4.
+ * Cf: https://developer.gitlab.com/v4/repos/contents/
  */
 export class GitLabContents {
   /**
    * The type of the file.
    */
-  type: 'file' | 'dir' | 'submodule' | 'symlink';
+  type: 'file' | 'dir' | 'submodule' | 'symlink' | 'blob' | 'tree';
+
+  /**
+   * The id of the file.
+   */
+  id: string;
 
   /**
    * The size of the file (in bytes).
@@ -71,6 +76,11 @@ export class GitLabContents {
    * The path of the file in the repository.
    */
   path: string;
+
+  /**
+   * The mode of the file.
+   */
+  mode: string;
 
   /**
    * A unique sha identifier for the file.
@@ -113,7 +123,7 @@ export class GitLabContents {
 }
 
 /**
- * Typings representing file contents from the GitLab API v3.
+ * Typings representing file contents from the GitLab API v4.
  * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-file
  */
 export class GitLabFileContents extends GitLabContents {
@@ -134,7 +144,7 @@ export class GitLabFileContents extends GitLabContents {
 }
 
 /**
- * Typings representing a directory from the GitLab API v3.
+ * Typings representing a directory from the GitLab API v4.
  */
 export class GitLabDirectoryContents extends GitLabContents {
   /**
@@ -144,7 +154,7 @@ export class GitLabDirectoryContents extends GitLabContents {
 }
 
 /**
- * Typings representing a blob from the GitLab API v3.
+ * Typings representing a blob from the GitLab API v4.
  * Cf: https://developer.gitlab.com/v3/git/blobs/#response
  */
 export class GitLabBlob {
@@ -175,7 +185,7 @@ export class GitLabBlob {
 }
 
 /**
- * Typings representing symlink contents from the GitLab API v3.
+ * Typings representing symlink contents from the GitLab API v4.
  * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-symlink
  */
 export class GitLabSymlinkContents extends GitLabContents {
@@ -186,7 +196,7 @@ export class GitLabSymlinkContents extends GitLabContents {
 }
 
 /**
- * Typings representing submodule contents from the GitLab API v3.
+ * Typings representing submodule contents from the GitLab API v4.
  * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-submodule
  */
 export class GitLabSubmoduleContents extends GitLabContents {
@@ -197,13 +207,13 @@ export class GitLabSubmoduleContents extends GitLabContents {
 }
 
 /**
- * Typings representing directory contents from the GitLab API v3.
+ * Typings representing directory contents from the GitLab API v4.
  * Cf: https://developer.gitlab.com/v3/repos/contents/#response-if-content-is-a-directory
  */
 export type GitLabDirectoryListing = GitLabContents[];
 
 /**
- * Typings representing repositories from the GitLab API v3.
+ * Typings representing repositories from the GitLab API v4.
  * Cf: https://developer.gitlab.com/v3/repos/#list-organization-repositories
  *
  * #### Notes
