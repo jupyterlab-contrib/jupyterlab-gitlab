@@ -77,26 +77,6 @@ Remember that this token is effectively a password for your GitLab account.
 _Do not_ share it online or check the token into version control,
 as people can use it to access all of your data on GitLab.
 
-#### Setting up an OAuth application (**deprecated**)
-
-This approach to authenticating with GitLab is deprecated, and will be removed in a future release.
-New users should use the access token approach.
-You can register an OAuth application with GitLab by following these steps:
-
-1.  Log into your GitLab account.
-1.  Go to https://gitlab.com/settings/developers and select the "OAuth Apps" tab on the left.
-1.  Click the "New OAuth App" button.
-1.  Fill out a name, homepage URL, description, and callback URL in the form.
-    This extension does not actually use OAuth, so these values actually _do not matter much_,
-    you just need to enter them to register the application.
-1.  Click the "Register application" button.
-1.  You should be taken to a new page with the new application information.
-    If you see fields showing "Client ID" and "Client Secret", congratulations!
-    These are the strings we need, and you have successfuly set up the application.
-
-It is important to note that the "Client Secret" string is, as the name suggests, a secret.
-_Do not_ share this value online, as people may be able to use it to impersonate you on GitLab.
-
 ### 3. Installing the serverextension
 
 Install the serverextension using pip, and then enable it:
@@ -122,14 +102,6 @@ c.GitLabConfig.access_token = '< YOUR_ACCESS_TOKEN >'
 ```
 
 where "`< YOUR_ACCESS_TOKEN >`" is the string value you obtained above.
-If you generated an OAuth app, instead enter the following:
-
-```python
-c.GitLabConfig.client_id = '< YOUR_CLIENT_ID >'
-c.GitLabConfig.client_secret = '< YOUR_CLIENT_SECRET >'
-```
-
-where "`< YOUR_CLIENT_ID >`" and "`< YOUR_CLIENT_SECRET >`" are the app values you obtained above.
 
 With this, you should be done! Launch JupyterLab and look for the GitLab tab on the left!
 

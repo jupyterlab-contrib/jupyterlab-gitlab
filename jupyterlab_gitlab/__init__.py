@@ -36,17 +36,8 @@ class GitLabConfig(Configurable):
     access_token = Unicode(
         '', config=True,
         help=(
-            "A personal access token for GitLab. If specified it takes "
-            "precedence over the `client_id` and `client_secret`"
+            "A personal access token for GitLab."
         )
-    )
-    client_id = Unicode(
-        '', config=True,
-        help="The Client ID for the GitLab OAuth app"
-    )
-    client_secret = Unicode(
-        '', config=True,
-        help="The Client secret for the GitLab OAuth app"
     )
     validate_cert = Bool(
         True, config=True,
@@ -94,12 +85,7 @@ class GitLabHandler(APIHandler):
                 )
                 raise HTTPError(403, msg)
             elif c.access_token != '':
-                # Preferentially use the access_token if set
                 params['access_token'] = c.access_token
-            elif c.client_id != '' and c.client_secret != '':
-                # Otherwise use client_id and client_secret if set
-                params['client_id'] = c.client_id
-                params['client_secret'] = c.client_secret
 
             api_path = url_concat(api_path, params)
             client = AsyncHTTPClient()
