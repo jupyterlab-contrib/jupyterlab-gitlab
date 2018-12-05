@@ -3,16 +3,16 @@ info:
   title: JupyterLab GitLab proxy
   description: Proxies GitLab API requests from JupyterLab to GitLab, optionally adding credentials to the request.
   version: 0.1.0
-  
+
 paths:
   /gitlab/{apiPath}:
     get:
-      summary: Gets the resource at the apiPath for the GitLab API v3.
+      summary: Gets the resource at the apiPath for the GitLab API v4.
       parameters:
         - name: apiPath
           in: path
           required: true
-          description: API path for GitLab v3.
+          description: API path for GitLab v4.
           schema:
             type: string
             format: uri

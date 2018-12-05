@@ -1,4 +1,6 @@
-import re, json, copy
+import re
+import json
+import copy
 
 import tornado.gen as gen
 from tornado.httputil import url_concat
@@ -10,7 +12,7 @@ from traitlets.config import Configurable
 from notebook.utils import url_path_join, url_escape
 from notebook.base.handlers import APIHandler
 
-__version__ = '0.7.0'
+__version__ = "0.1.0"
 
 
 link_regex = re.compile(r'<([^>]*)>;\s*rel="([\w]*)\"')
@@ -20,43 +22,43 @@ class GitLabConfig(Configurable):
     """
     Allows configuration of access to the GitLab api
     """
+
     allow_client_side_access_token = Bool(
-        False, config=True,
+        False,
+        config=True,
         help=(
             "If True the access token specified in the JupyterLab settings "
             "will take precedence. If False the token specified in JupyterLab "
             "will be ignored. Storing your access token in the client can "
             "present a security risk so be careful if enabling this setting."
-        )
+        ),
     )
     api_url = Unicode(
-        'https://api.gitlab.com', config=True,
-        help="The url for the GitLab api"
+        "https://gitlab.com/api/v4", config=True, help="The url for the GitLab api"
     )
     access_token = Unicode(
-        '', config=True,
-        help=(
-            "A personal access token for GitLab."
-        )
+        "", config=True, help=("A personal access token for GitLab.")
     )
     validate_cert = Bool(
-        True, config=True,
+        True,
+        config=True,
         help=(
             "Whether to validate the servers' SSL certificate on requests "
             "made to the GitLab api. In general this is a bad idea so only "
             "disable SSL validation if you know what you are doing!"
-        )
+        ),
     )
 
 
 class GitLabHandler(APIHandler):
     """
-    A proxy for the GitLab API v3.
+    A proxy for the GitLab API v4.
 
     The purpose of this proxy is to provide authentication to the API requests
     which allows for a higher rate limit. Without this, the rate limit on
     unauthenticated calls is so limited as to be practically useless.
     """
+
     @gen.coroutine
     def get(self, path):
         """
@@ -70,12 +72,12 @@ class GitLabHandler(APIHandler):
             query = self.request.query_arguments
             params = {key: query[key][0].decode() for key in query}
             api_path = url_path_join(c.api_url, url_escape(path))
-            params['per_page'] = 100
+            params["per_page"] = 100
 
-            access_token = params.pop('access_token', None)
-            if access_token and c.allow_client_side_access_token == True:
-                params['access_token'] = access_token
-            elif access_token and c.allow_client_side_access_token == False:
+            access_token = params.pop("access_token", None)
+            if access_token and c.allow_client_side_access_token:
+                params["access_token"] = access_token
+            elif access_token and not c.allow_client_side_access_token:
                 msg = (
                     "Client side (JupyterLab) access tokens have been "
                     "disabled for security reasons.\nPlease remove your "
@@ -84,17 +86,16 @@ class GitLabHandler(APIHandler):
                     "c.GitLabConfig.access_token = '<TOKEN>'\n"
                 )
                 raise HTTPError(403, msg)
-            elif c.access_token != '':
-                params['access_token'] = c.access_token
+            elif c.access_token != "":
+                params["access_token"] = c.access_token
 
             api_path = url_concat(api_path, params)
             client = AsyncHTTPClient()
             request = HTTPRequest(
-                api_path, validate_cert=c.validate_cert,
-                user_agent='JupyterLab GitLab'
+                api_path, validate_cert=c.validate_cert, user_agent="JupyterLab GitLab"
             )
             response = yield client.fetch(request)
-            data = json.loads(response.body.decode('utf-8'))
+            data = json.loads(response.body.decode("utf-8"))
 
             # Check if we need to paginate results.
             # If so, get pages until all the results
@@ -105,7 +106,7 @@ class GitLabHandler(APIHandler):
                 request.url = next_page_path
                 response = yield client.fetch(request)
                 next_page_path = self._maybe_get_next_page_path(response)
-                data.extend(json.loads(response.body.decode('utf-8')))
+                data.extend(json.loads(response.body.decode("utf-8")))
 
             # Send the results back.
             self.finish(json.dumps(data))
@@ -118,21 +119,21 @@ class GitLabHandler(APIHandler):
     def _maybe_get_next_page_path(self, response):
         # If there is a 'Link' header in the response, we
         # need to paginate.
-        link_headers = response.headers.get_list('Link')
+        link_headers = response.headers.get_list("Link")
         next_page_path = None
         if link_headers:
             links = {}
             matched = link_regex.findall(link_headers[0])
             for match in matched:
                 links[match[1]] = match[0]
-            next_page_path = links.get('next', None)
+            next_page_path = links.get("next", None)
 
         return next_page_path
 
+
 def _jupyter_server_extension_paths():
-    return [{
-        'module': 'jupyterlab_gitlab'
-    }]
+    return [{"module": "jupyterlab_gitlab"}]
+
 
 def load_jupyter_server_extension(nb_server_app):
     """
@@ -142,7 +143,7 @@ def load_jupyter_server_extension(nb_server_app):
         nb_server_app (NotebookWebApplication): handle to the Notebook webserver instance.
     """
     web_app = nb_server_app.web_app
-    base_url = web_app.settings['base_url']
-    endpoint = url_path_join(base_url, 'gitlab')
+    base_url = web_app.settings["base_url"]
+    endpoint = url_path_join(base_url, "gitlab")
     handlers = [(endpoint + "(.*)", GitLabHandler)]
-    web_app.add_handlers('.*$', handlers)
+    web_app.add_handlers(".*$", handlers)
