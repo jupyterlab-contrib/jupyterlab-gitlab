@@ -1,28 +1,26 @@
 """
 Setup module for the jupyterlab_gitlab proxy extension
 """
-import setuptools
-from setupbase import create_cmdclass, ensure_python, find_packages
+from setuptools import setup, find_packages
 
-data_files_spec = [
-    (
-        "etc/jupyter/jupyter_notebook_config.d",
-        "jupyter-config/jupyter_notebook_config.d",
-        "jupyterlab_gitlab.json",
-    )
-]
 
-cmdclass = create_cmdclass(data_files_spec=data_files_spec)
-
-setup_dict = dict(
+setup(
     name="jupyterlab_gitlab",
-    description="A Jupyter Notebook server extension which acts a proxy for the GitLab API.",
-    packages=find_packages(),
-    cmdclass=cmdclass,
-    author="Jupyter Development Team",
-    author_email="jupyter@googlegroups.com",
-    url="http://jupyter.org",
+    author="Benjamin Bertrand",
+    author_email="beenje@gmail.com",
+    description="A Jupyter Notebook server extension which acts as a proxy for the GitLab API.",
+    url="https://gitlab.com/beenje/jupyterlab-gitlab",
     license="BSD",
+    version="0.1.0",
+    install_requires=["notebook"],
+    packages=find_packages(include=["jupyterlab_gitlab"]),
+    include_package_data=True,
+    data_files=[
+        (
+            "etc/jupyter/jupyter_notebook_config.d",
+            ["jupyter-config/jupyter_notebook_config.d/jupyterlab_gitlab.json"],
+        )
+    ],
     platforms="Linux, Mac OS X, Windows",
     keywords=["Jupyter", "JupyterLab", "GitLab"],
     python_requires=">=3.5",
@@ -34,18 +32,4 @@ setup_dict = dict(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
     ],
-    install_requires=["notebook"],
 )
-
-try:
-    ensure_python(setup_dict["python_requires"].split(","))
-except ValueError as e:
-    raise ValueError(
-        "{:s}, to use {} you must use python {} ".format(
-            e, setup_dict["name"], setup_dict["python_requires"]
-        )
-    )
-
-from jupyterlab_gitlab import __version__
-
-setuptools.setup(version=__version__, **setup_dict)

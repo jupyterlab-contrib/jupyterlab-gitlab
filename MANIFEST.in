@@ -1,3 +1,2 @@
-include setupbase.py
+include LICENSE
 include README.md
-include package.json

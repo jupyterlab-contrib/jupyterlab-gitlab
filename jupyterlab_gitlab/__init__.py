@@ -8,13 +8,16 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
 
 from traitlets import Unicode, Bool
 from traitlets.config import Configurable
+from pkg_resources import get_distribution, DistributionNotFound
 
 from notebook.utils import url_path_join, url_escape
 from notebook.base.handlers import APIHandler
 
-__version__ = "0.1.0"
-
-
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
+    pass
 link_regex = re.compile(r'<([^>]*)>;\s*rel="([\w]*)\"')
 
 
