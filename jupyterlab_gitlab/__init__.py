@@ -74,9 +74,9 @@ class GitLabHandler(APIHandler):
             api_path = url_path_join(c.api_url, url_escape(path))
             params["per_page"] = 100
 
-            access_token = params.pop("access_token", None)
+            access_token = params.pop("private_token", None)
             if access_token and c.allow_client_side_access_token:
-                params["access_token"] = access_token
+                params["private_token"] = access_token
             elif access_token and not c.allow_client_side_access_token:
                 msg = (
                     "Client side (JupyterLab) access tokens have been "
@@ -87,7 +87,7 @@ class GitLabHandler(APIHandler):
                 )
                 raise HTTPError(403, msg)
             elif c.access_token != "":
-                params["access_token"] = c.access_token
+                params["private_token"] = c.access_token
 
             api_path = url_concat(api_path, params)
             client = AsyncHTTPClient()

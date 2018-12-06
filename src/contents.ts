@@ -574,7 +574,7 @@ export class GitLabDrive implements Contents.IDrive {
         requestUrl = URLExt.join(this._serverSettings.baseUrl, 'gitlab');
         // add the access token if defined
         if (this.accessToken) {
-          params['access_token'] = this.accessToken;
+          params['private_token'] = this.accessToken;
         }
       } else {
         requestUrl = URLExt.join(this.baseUrl, 'api', 'v4');
