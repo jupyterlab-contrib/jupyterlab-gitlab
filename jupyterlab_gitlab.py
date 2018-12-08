@@ -38,8 +38,8 @@ class GitLabConfig(Configurable):
             "present a security risk so be careful if enabling this setting."
         ),
     )
-    api_url = Unicode(
-        "https://gitlab.com/api/v4", config=True, help="The url for the GitLab api"
+    url = Unicode(
+        "https://gitlab.com", config=True, help="The url for the GitLab instance."
     )
     access_token = Unicode(
         "", config=True, help=("A personal access token for GitLab.")
@@ -89,7 +89,7 @@ class GitLabHandler(APIHandler):
         try:
             query = self.request.query_arguments
             params = {key: query[key][0].decode() for key in query}
-            api_path = url_path_join(c.api_url, path)
+            api_path = url_path_join(c.url, "api", "v4", path)
             params["per_page"] = 100
 
             access_token = params.pop("private_token", None)
