@@ -58,7 +58,7 @@ from https://gitlab.com/profile/personal_access_tokens, and then to proxy your r
 To install the lab extension, enter the following in your terminal:
 
 ```bash
-jupyter labextension install @jupyterlab/gitlab
+jupyter labextension install jupyterlab-gitlab
 ```
 
 With only this installed, the extension should work.

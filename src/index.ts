@@ -29,7 +29,7 @@ const NAMESPACE = 'gitlab-filebrowser';
 /**
  * The ID for the plugin.
  */
-const PLUGIN_ID = '@jupyterlab/gitlab:drive';
+const PLUGIN_ID = 'jupyterlab-gitlab:drive';
 
 /**
  * The JupyterLab plugin for the GitLab Filebrowser.

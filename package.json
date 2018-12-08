@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/gitlab",
+  "name": "jupyterlab-gitlab",
   "version": "0.1.0",
   "description": "JupyterLab viewer for GitLab repositories",
   "keywords": [
@@ -8,12 +8,12 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://gitlab.com/jupyterlab/jupyterlab-gitlab",
+  "homepage": "https://gitlab.com/beenje/jupyterlab-gitlab",
   "bugs": {
-    "url": "https://gitlab.com/jupyterlab/jupyterlab-gitlab/issues"
+    "url": "https://gitlab.com/beenje/jupyterlab-gitlab/issues"
   },
   "license": "BSD-3-Clause",
-  "author": "Ian Rose",
+  "author": "Benjamin Bertrand",
   "files": [
     "lib/*/*d.ts",
     "lib/*/*.js",
@@ -29,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/jupyterlab/jupyterlab-gitlab.git"
+    "url": "https://gitlab.com/beenje/jupyterlab-gitlab"
   },
   "scripts": {
     "build": "tsc",
