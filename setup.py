@@ -1,7 +1,7 @@
 """
 Setup module for the jupyterlab_gitlab proxy extension
 """
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 setup(
@@ -13,7 +13,7 @@ setup(
     license="BSD",
     version="0.1.0",
     install_requires=["notebook"],
-    packages=find_packages(include=["jupyterlab_gitlab"]),
+    py_modules=["jupyterlab_gitlab"],
     include_package_data=True,
     data_files=[
         (
