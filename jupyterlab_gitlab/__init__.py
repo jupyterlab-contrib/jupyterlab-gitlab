@@ -1,3 +1,5 @@
+import base64
+import binascii
 import re
 import json
 import copy
@@ -10,7 +12,7 @@ from traitlets import Unicode, Bool
 from traitlets.config import Configurable
 from pkg_resources import get_distribution, DistributionNotFound
 
-from notebook.utils import url_path_join, url_escape
+from notebook.utils import url_path_join
 from notebook.base.handlers import APIHandler
 
 try:
@@ -71,10 +73,23 @@ class GitLabHandler(APIHandler):
 
         # Get access to the notebook config object
         c = GitLabConfig(config=self.config)
+        # The server only accepts url safe base64 encoded path.
+        # This is to avoid tornado route matching decoding the url
+        # and replacing %2F with / in the url.
+        # We use namespaced API calls and NAMESPACE/PROJECT_NAME is
+        # already encoded as NAMESPACE%2FPROJECT_NAME
+        # https://docs.gitlab.com/ee/api/#namespaced-path-encoding
+        try:
+            path = base64.urlsafe_b64decode(path).decode("utf-8")
+        except binascii.Error as e:
+            raise HTTPError(
+                400,
+                "The server only accepts url safe base64 encoded path: {}".format(e),
+            )
         try:
             query = self.request.query_arguments
             params = {key: query[key][0].decode() for key in query}
-            api_path = url_path_join(c.api_url, url_escape(path))
+            api_path = url_path_join(c.api_url, path)
             params["per_page"] = 100
 
             access_token = params.pop("private_token", None)
@@ -148,5 +163,5 @@ def load_jupyter_server_extension(nb_server_app):
     web_app = nb_server_app.web_app
     base_url = web_app.settings["base_url"]
     endpoint = url_path_join(base_url, "gitlab")
-    handlers = [(endpoint + "(.*)", GitLabHandler)]
+    handlers = [(endpoint + "/(.*)", GitLabHandler)]
     web_app.add_handlers(".*$", handlers)

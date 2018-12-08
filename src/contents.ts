@@ -48,6 +48,8 @@ export class GitLabDrive implements Contents.IDrive {
     // to see if the server proxy is installed.
     // If so, use that. If not, warn the user and
     // use the client-side implementation.
+    // The path is expected to be url safe base64 encoded by the
+    // server proxy
     this._useProxy = new Promise<boolean>(resolve => {
       // GET /templates/licenses
       // https://docs.gitlab.com/ee/api/templates/licenses.html
@@ -56,8 +58,7 @@ export class GitLabDrive implements Contents.IDrive {
       const requestUrl = URLExt.join(
         this._serverSettings.baseUrl,
         'gitlab',
-        'templates',
-        'licenses'
+        Private.b64EncodeUrlSafe('/templates/licenses')
       );
       proxiedApiRequest<any>(requestUrl, this._serverSettings)
         .then(() => {
@@ -558,7 +559,7 @@ export class GitLabDrive implements Contents.IDrive {
    * notebook server proxy or not.
    */
   private _apiRequest<T>(apiPath: string): Promise<T> {
-    return this._useProxy.then(result => {
+    return this._useProxy.then(useProxy => {
       let parts = apiPath.split('?');
       let path = parts[0];
       let query = (parts[1] || '').split('&');
@@ -570,7 +571,7 @@ export class GitLabDrive implements Contents.IDrive {
         }
       }
       let requestUrl: string;
-      if (result === true) {
+      if (useProxy === true) {
         requestUrl = URLExt.join(this._serverSettings.baseUrl, 'gitlab');
         // add the access token if defined
         if (this.accessToken) {
@@ -580,13 +581,18 @@ export class GitLabDrive implements Contents.IDrive {
         requestUrl = URLExt.join(this.baseUrl, 'api', 'v4');
       }
       if (path) {
+        if (useProxy === true) {
+          // The path is expected to be url safe base64 encoded by the
+          // server proxy
+          path = Private.b64EncodeUrlSafe(path);
+        }
         requestUrl = URLExt.join(requestUrl, path);
       }
       let newQuery = Object.keys(params)
         .map(key => `${key}=${params[key]}`)
         .join('&');
       requestUrl += '?' + newQuery;
-      if (result === true) {
+      if (useProxy === true) {
         return proxiedApiRequest<T>(requestUrl, this._serverSettings);
       } else {
         return browserApiRequest<T>(requestUrl);
@@ -832,5 +838,20 @@ namespace Private {
   export function b64DecodeUTF8(str: string): string {
     const bytes = base64js.toByteArray(str.replace(/\n/g, ''));
     return decoder.decode(bytes);
+  }
+
+  /**
+   * Encode a string using the URL- and filesystem-safe alphabet,
+   * which substitutes - instead of + and _ instead of / in the standard Base64 alphabet.
+   * The result can still contain =.
+   *
+   * Equivalent to Python https://docs.python.org/3/library/base64.html#base64.urlsafe_b64encode
+   * Can be decoded from Python in the server extension using urlsafe_b64decode
+   * https://docs.python.org/3/library/base64.html#base64.urlsafe_b64decode
+   */
+  export function b64EncodeUrlSafe(str: string): string {
+    return btoa(str)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
   }
 }
