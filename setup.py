@@ -1,11 +1,11 @@
 """
-Setup module for the jupyterlab_gitlab proxy extension
+Setup module for the jupyterlab-gitlab proxy extension
 """
 from setuptools import setup
 
 
 setup(
-    name="jupyterlab_gitlab",
+    name="jupyterlab-gitlab",
     author="Benjamin Bertrand",
     author_email="beenje@gmail.com",
     description="A Jupyter Notebook server extension which acts as a proxy for the GitLab API.",

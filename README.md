@@ -83,7 +83,7 @@ need to create another one.
 Install the server extension using pip, and then enable it:
 
 ```bash
-pip install jupyterlab_gitlab
+pip install jupyterlab-gitlab
 ```
 
 If you are running Notebook 5.3 or later, this will automatically enable the extension.
