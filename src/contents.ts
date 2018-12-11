@@ -16,9 +16,7 @@ import {
   proxiedApiRequest,
   GitLabRepo,
   GitLabContents,
-  GitLabBlob,
-  GitLabFileContents,
-  GitLabDirectoryListing
+  GitLabFileContents
 } from './gitlab';
 
 import * as base64js from 'base64-js';
@@ -251,16 +249,6 @@ export class GitLabDrive implements Contents.IDrive {
           }
           console.error(err.message);
           return Promise.reject(err);
-        } else if (
-          err.response.status === 403 &&
-          err.message.indexOf('blob') !== -1
-        ) {
-          // Set the states
-          this._validUser = true;
-          if (this.rateLimitedState.get() !== false) {
-            this.rateLimitedState.set(false);
-          }
-          return this._getBlob(path);
         } else {
           console.error(err.message);
           return Promise.reject(err);
@@ -272,11 +260,6 @@ export class GitLabDrive implements Contents.IDrive {
    * Get an encoded download url given a file path.
    *
    * @param path - An absolute POSIX file path on the server.
-   *
-   * #### Notes
-   * It is expected that the path contains no relative paths,
-   * use [[ContentsManager.getAbsolutePath]] to get an absolute
-   * path if necessary.
    */
   getDownloadUrl(path: string): Promise<string> {
     // Parse the path into user/repo/path
@@ -291,28 +274,23 @@ export class GitLabDrive implements Contents.IDrive {
       return Promise.reject('GitLab: No file selected');
     }
 
-    // Otherwise identify the repository and get the url of the
-    // appropriate resource.
-    const dirname = PathExt.dirname(resource.path);
-    const dirApiPath = URLExt.encodeParts(
+    // Create the url to get the raw file from the repository
+    // https://docs.gitlab.com/ee/api/repository_files.html#get-raw-file-from-repository
+    // GET /projects/:id/repository/files/:file_path/raw
+    const apiUrl = URLExt.join(this.baseUrl, 'api', 'v4');
+    const rawUrl =
       URLExt.join(
-        'repos',
-        resource.user,
-        resource.repository,
-        'contents',
-        dirname
-      )
-    );
-    return this._apiRequest<GitLabDirectoryListing>(dirApiPath).then(
-      dirContents => {
-        for (let item of dirContents) {
-          if (item.path === resource.path) {
-            return item.download_url;
-          }
-        }
-        throw Private.makeError(404, `Cannot find file at ${resource.path}`);
-      }
-    );
+        apiUrl,
+        'projects',
+        encodeURIComponent(resource.user) +
+          '%2F' +
+          encodeURIComponent(resource.repository),
+        'repository',
+        'files',
+        encodeURIComponent(resource.path),
+        'raw'
+      ) + '?ref=master';
+    return Promise.resolve(rawUrl);
   }
 
   /**
@@ -431,59 +409,6 @@ export class GitLabDrive implements Contents.IDrive {
    */
   deleteCheckpoint(path: string, checkpointID: string): Promise<void> {
     return Promise.reject('Read only');
-  }
-
-  /**
-   * If a file is too large (> 1Mb), we need to access it over the
-   * GitLab Git Data API.
-   */
-  private _getBlob(path: string): Promise<Contents.IModel> {
-    let blobData: GitLabFileContents;
-    // Get the contents of the parent directory so that we can
-    // get the sha of the blob.
-    const resource = parsePath(path);
-    const dirname = PathExt.dirname(resource.path);
-    const dirApiPath = URLExt.encodeParts(
-      URLExt.join(
-        'projects',
-        resource.repository,
-        'repository',
-        'tree',
-        '?path=' + dirname
-      )
-    );
-    return this._apiRequest<GitLabDirectoryListing>(dirApiPath)
-      .then(dirContents => {
-        for (let item of dirContents) {
-          if (item.path === resource.path) {
-            blobData = item as GitLabFileContents;
-            return item.sha;
-          }
-        }
-        throw Error('Cannot find sha for blob');
-      })
-      .then(sha => {
-        // Once we have the sha, form the api url and make the request.
-        const blobApiPath = URLExt.encodeParts(
-          URLExt.join(
-            'projects',
-            resource.repository,
-            'repository',
-            'blobs',
-            sha
-          )
-        );
-        return this._apiRequest<GitLabBlob>(blobApiPath);
-      })
-      .then(blob => {
-        // Convert the data to a Contents.IModel.
-        blobData.content = blob.content;
-        return Private.gitLabContentsToJupyterContents(
-          path,
-          blobData,
-          this._fileTypeForPath
-        );
-      });
   }
 
   /**
@@ -640,7 +565,7 @@ namespace Private {
   };
 
   /**
-   * Given a JSON GitLabContents object returned by the GitLab API v3,
+   * Given a JSON GitLabContents object returned by the GitLab API v4,
    * convert it to the Jupyter Contents.IModel.
    *
    * @param path - the path to the contents model in the repository.
@@ -679,12 +604,13 @@ namespace Private {
         })
       } as Contents.IModel;
     } else if (
-      contents.type === 'file' ||
-      contents.type === 'symlink' ||
       contents.type === 'blob' ||
       contents.hasOwnProperty('file_name')
     ) {
       // If it is a file or blob, convert to a file
+      // blob is the type returned for files by GET /projects/:id/repository/tree
+      // file_name is the property checked when getting a file from a repository
+      // with GET /projects/:id/repository/files/:file_path (no type is returned)
       const fileType = fileTypeForPath(path);
       const fileContents = (contents as GitLabFileContents).content;
       let content: any;
@@ -718,8 +644,9 @@ namespace Private {
         mimetype: fileType.mimeTypes[0],
         content
       };
-    } else if (contents.type === 'dir' || contents.type == 'tree') {
-      // If it is a directory, convert to that.
+    } else if (contents.type == 'tree') {
+      // If it is a tree, convert to a directory.
+      // tree is the type returned for directories by GET /projects/:id/repository/tree
       return {
         name: PathExt.basename(path),
         path: path,
@@ -731,13 +658,9 @@ namespace Private {
         mimetype: '',
         content: null
       };
-    } else if (contents.type === 'submodule') {
-      // If it is a submodule, throw an error, since we cannot
-      // GET submodules at the moment. NOTE: due to a bug in the GithHub
-      // API, the `type` for submodules in a directory listing is incorrectly
-      // reported as `file`: https://gitlab.com/gitlab/developer.gitlab.com/commit/1b329b04cece9f3087faa7b1e0382317a9b93490
-      // This means submodules will show up in the listing, but we still should not
-      // open them.
+    } else if (contents.type === 'commit') {
+      // If it is a submodule, throw an error for now
+      // Investigate if we can open them
       throw makeError(
         400,
         `Cannot open "${contents.name}" because it is a submodule`
