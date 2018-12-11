@@ -498,32 +498,10 @@ export class GitLabDrive implements Contents.IDrive {
       .catch(err => {
         // If we can't find the org, it may be a user.
         if (err.response.status === 404) {
-          // Check if it is the authenticated user.
-          return this._apiRequest<any>('user')
-            .then(currentUser => {
-              let reposPath: string;
-              // If we are looking at the currently authenticated user,
-              // get all the repositories they own, which includes private ones.
-              if (currentUser.login === user) {
-                reposPath = 'projects?owned=true';
-              } else {
-                reposPath = URLExt.encodeParts(
-                  URLExt.join('users', user, 'projects')
-                );
-              }
-              return this._apiRequest<GitLabRepo[]>(reposPath);
-            })
-            .catch(err => {
-              // If there is no authenticated user, return the public
-              // users api path.
-              if (err.response.status === 401) {
-                const reposPath = URLExt.encodeParts(
-                  URLExt.join('users', user, 'projects')
-                );
-                return this._apiRequest<GitLabRepo[]>(reposPath);
-              }
-              throw err;
-            });
+          const reposPath = URLExt.encodeParts(
+            URLExt.join('users', user, 'projects')
+          );
+          return this._apiRequest<GitLabRepo[]>(reposPath);
         }
         throw err;
       })
