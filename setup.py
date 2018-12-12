@@ -4,11 +4,17 @@ Setup module for the jupyterlab-gitlab proxy extension
 from setuptools import setup
 
 
+with open("README.md") as f:
+    long_description = f.read()
+
+
 setup(
     name="jupyterlab-gitlab",
     author="Benjamin Bertrand",
     author_email="beenje@gmail.com",
     description="A Jupyter Notebook server extension which acts as a proxy for the GitLab API.",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://gitlab.com/beenje/jupyterlab-gitlab",
     license="BSD",
     version="0.1.0",
