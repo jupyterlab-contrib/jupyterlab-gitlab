@@ -190,7 +190,7 @@ export class GitLabDrive implements Contents.IDrive {
     let endUrl = 'tree';
     // Otherwise check if we want to retrieve a file or directory content
     if (resource.path) {
-      if (options && options.type === 'file') {
+      if (options && (options.type === 'file' || options.type === 'notebook')) {
         // Get file from repository
         // https://docs.gitlab.com/ee/api/repository_files.html#get-file-from-repository
         // GET /projects/:id/repository/files/:file_path
