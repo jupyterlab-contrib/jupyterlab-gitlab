@@ -18,6 +18,9 @@ repositories. If those files are notebooks, you can run them just as you would
 any other notebook. You can also attach a kernel to text files and run those.
 Basically, you should be able to open any file in a repository that JupyterLab can handle.
 
+Here is a screenshot of the plugin opening this very file on GitLab:
+![gitception](gitception.png 'Gitception')
+
 ### What this extension is not
 
 This is not an extension that provides full GitLab access, such as
