@@ -674,7 +674,7 @@ namespace Private {
   }
 
   /**
-   * Given an array of JSON GitLabRepo objects returned by the GitLab API v3,
+   * Given an array of JSON GitLabRepo objects returned by the GitLab API v4,
    * convert it to the Jupyter Contents.IModel conforming to a directory of
    * those repositories.
    *
@@ -686,8 +686,10 @@ namespace Private {
     // If it is a directory, convert to that.
     let content: Contents.IModel[] = repos.map(repo => {
       return {
-        name: repo.name,
-        path: repo.name,
+        // use the repo path instead of the name
+        // otherwise we won't be able to browse it if they differ
+        name: repo.path,
+        path: repo.path,
         format: 'json',
         type: 'directory',
         created: '',
