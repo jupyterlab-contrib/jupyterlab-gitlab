@@ -1,0 +1,45 @@
+stages:
+  - check
+  - test
+  - release
+
+check:
+  stage: check
+  image: python:3.6
+  before_script:
+    - pip install pre-commit
+  script:
+    - pre-commit run --all-files
+
+test-python37:
+  stage: test
+  image: continuumio/miniconda:latest
+  before_script:
+    - conda create -n jupyterlab-ext -y -c conda-forge python=3.7 jupyterlab nodejs
+    - conda activate jupyterlab-ext
+  script:
+    - jlpm install
+    - jlpm run build
+    - jupyter labextension install
+    - pip install .
+
+release-npm:
+  stage: release
+  image: node:latest
+  before_script:
+    - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
+  script:
+    - npm publish
+  only:
+    - tags
+
+release-pypi:
+  stage: release
+  image: python:3.7
+  before_script:
+    - pip install twine
+  script:
+    - python setup.py check sdist bdist_wheel
+    - twine upload dist/*
+  only:
+    - tags
