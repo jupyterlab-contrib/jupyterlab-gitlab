@@ -644,7 +644,7 @@ namespace Private {
         mimetype: fileType.mimeTypes[0],
         content
       };
-    } else if (contents.type == 'tree') {
+    } else if (contents.type === 'tree') {
       // If it is a tree, convert to a directory.
       // tree is the type returned for directories by GET /projects/:id/repository/tree
       return {
