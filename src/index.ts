@@ -3,8 +3,8 @@
 
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
@@ -34,7 +34,7 @@ const PLUGIN_ID = 'jupyterlab-gitlab:drive';
 /**
  * The JupyterLab plugin for the GitLab Filebrowser.
  */
-const fileBrowserPlugin: JupyterLabPlugin<void> = {
+const fileBrowserPlugin: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   requires: [
     IDocumentManager,
@@ -50,14 +50,12 @@ const fileBrowserPlugin: JupyterLabPlugin<void> = {
  * Activate the file browser.
  */
 function activateFileBrowser(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   manager: IDocumentManager,
   factory: IFileBrowserFactory,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry
 ): void {
-  const { commands } = app;
-
   // Add the GitLab backend to the contents manager.
   const drive = new GitLabDrive(app.docRegistry);
   manager.services.contents.addDrive(drive);
@@ -67,7 +65,6 @@ function activateFileBrowser(
   // and rate-limiting can be an issue, so we give a 5 minute
   // refresh interval.
   const browser = factory.createFileBrowser(NAMESPACE, {
-    commands,
     driveName: drive.name,
     refreshInterval: 300000
   });
@@ -81,7 +78,7 @@ function activateFileBrowser(
 
   // Add the file browser widget to the application restorer.
   restorer.add(gitLabBrowser, NAMESPACE);
-  app.shell.addToLeftArea(gitLabBrowser, { rank: 102 });
+  app.shell.add(gitLabBrowser, 'left', { rank: 102 });
 
   let shouldWarn = false;
   const onSettingsUpdated = async (settings: ISettingRegistry.ISettings) => {

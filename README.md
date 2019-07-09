@@ -46,7 +46,7 @@ This process is described in the [installation](#Installation) section.
 
 ## Prerequisites
 
-- JupyterLab 0.35
+- JupyterLab 1.0
 - A GitLab account for the server extension
 
 ## Installation
