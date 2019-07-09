@@ -1,15 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
-
 import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { FileBrowser } from '@jupyterlab/filebrowser';
 
-import { ObservableValue } from '@jupyterlab/observables';
+import { Message } from '@phosphor/messaging';
+
+import { ISignal, Signal } from '@phosphor/signaling';
+
+import { PanelLayout, Widget } from '@phosphor/widgets';
 
 import { GitLabDrive, parsePath } from './contents';
 
@@ -26,14 +28,10 @@ export class GitLabFileBrowser extends Widget {
     this._drive = drive;
 
     // Create an editable name for the user/org name.
-    this.userName = new GitLabEditableName('', '<Edit User>');
-    this.userName.addClass('jp-GitLabEditableUserName');
+    this.userName = new GitLabUserInput();
     this.userName.node.title = 'Click to edit user/group';
     this._browser.toolbar.addItem('user', this.userName);
-    this.userName.name.changed.connect(
-      this._onUserChanged,
-      this
-    );
+    this.userName.nameChanged.connect(this._onUserChanged, this);
     // Create a button that opens GitLab at the appropriate
     // repo+directory.
     this._openGitLabButton = new ToolbarButton({
@@ -79,36 +77,27 @@ export class GitLabFileBrowser extends Widget {
     this._browser.toolbar.addItem('gh-refresher', refresher);
 
     // Set up a listener to check the username.
-    this._browser.model.pathChanged.connect(
-      this._onPathChanged,
-      this
-    );
+    this._browser.model.pathChanged.connect(this._onPathChanged, this);
     // Trigger an initial pathChanged to check for the username.
     this._onPathChanged();
 
-    this._drive.rateLimitedState.changed.connect(
-      this._updateErrorPanel,
-      this
-    );
+    this._drive.rateLimitedState.changed.connect(this._updateErrorPanel, this);
   }
 
   /**
    * An editable widget hosting the current user name.
    */
-  readonly userName: GitLabEditableName;
+  readonly userName: GitLabUserInput;
 
   /**
    * React to a change in user.
    */
-  private _onUserChanged(
-    sender: ObservableValue,
-    args: ObservableValue.IChangedArgs
-  ) {
+  private _onUserChanged() {
     if (this._changeGuard) {
       return;
     }
     this._changeGuard = true;
-    this._browser.model.cd(`/${args.newValue as string}`).then(() => {
+    this._browser.model.cd(`/${this.userName.name}`).then(() => {
       this._changeGuard = false;
       this._updateErrorPanel();
       // Once we have the new listing, maybe give the file listing
@@ -134,7 +123,7 @@ export class GitLabFileBrowser extends Widget {
     // If we are not already changing the user name, set it.
     if (!this._changeGuard) {
       this._changeGuard = true;
-      this.userName.name.set(resource.user);
+      this.userName.name = resource.user;
       this._changeGuard = false;
       this._updateErrorPanel();
     }
@@ -197,51 +186,109 @@ export class GitLabFileBrowser extends Widget {
  * used to host the currently active GitLab
  * user name.
  */
-export class GitLabEditableName extends Widget {
-  constructor(initialName: string = '', placeholder?: string) {
+export class GitLabUserInput extends Widget {
+  constructor() {
     super();
-    this.addClass('jp-GitLabEditableName');
-    this._nameNode = document.createElement('div');
-    this._nameNode.className = 'jp-GitLabEditableName-display';
-    this._editNode = document.createElement('input');
-    this._editNode.className = 'jp-GitLabEditableName-input';
-
-    this._placeholder = placeholder || '<Edit Name>';
-
-    this.node.appendChild(this._nameNode);
-    this.name = new ObservableValue(initialName);
-    this._nameNode.textContent = initialName || this._placeholder;
-
-    this.node.onclick = () => {
-      if (this._pending) {
-        return;
-      }
-      this._pending = true;
-      Private.changeField(this._nameNode, this._editNode).then(value => {
-        this._pending = false;
-        if (this.name.get() !== value) {
-          this.name.set(value);
-        }
-      });
-    };
-
-    this.name.changed.connect((s, args) => {
-      if (args.oldValue !== args.newValue) {
-        this._nameNode.textContent =
-          (args.newValue as string) || this._placeholder;
-      }
-    });
+    this.addClass('jp-GitLabUserInput');
+    const layout = (this.layout = new PanelLayout());
+    const wrapper = new Widget();
+    wrapper.addClass('jp-GitLabUserInput-wrapper');
+    this._input = document.createElement('input');
+    this._input.placeholder = 'GitLab User or Group';
+    this._input.className = 'jp-GitLabUserInput-input';
+    wrapper.node.appendChild(this._input);
+    layout.addWidget(wrapper);
   }
 
   /**
    * The current name of the field.
    */
-  readonly name: ObservableValue;
+  get name(): string {
+    return this._name;
+  }
+  set name(value: string) {
+    if (value === this._name) {
+      return;
+    }
+    const old = this._name;
+    this._name = value;
+    this._input.value = value;
+    this._nameChanged.emit({
+      oldValue: old,
+      newValue: value
+    });
+  }
 
-  private _pending = false;
-  private _placeholder: string;
-  private _nameNode: HTMLElement;
-  private _editNode: HTMLInputElement;
+  /**
+   * A signal for when the name changes.
+   */
+  get nameChanged(): ISignal<this, { newValue: string; oldValue: string }> {
+    return this._nameChanged;
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the main area widget's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: KeyboardEvent): void {
+    switch (event.type) {
+      case 'keydown':
+        switch (event.keyCode) {
+          case 13: // Enter
+            event.stopPropagation();
+            event.preventDefault();
+            this.name = this._input.value;
+            this._input.blur();
+            break;
+          default:
+            break;
+        }
+        break;
+      case 'blur':
+        event.stopPropagation();
+        event.preventDefault();
+        this.name = this._input.value;
+        break;
+      case 'focus':
+        event.stopPropagation();
+        event.preventDefault();
+        this._input.select();
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    this._input.addEventListener('keydown', this);
+    this._input.addEventListener('blur', this);
+    this._input.addEventListener('focus', this);
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    this._input.removeEventListener('keydown', this);
+    this._input.removeEventListener('blur', this);
+    this._input.removeEventListener('focus', this);
+  }
+
+  private _name = '';
+  private _nameChanged = new Signal<
+    this,
+    { newValue: string; oldValue: string }
+  >(this);
+  private _input: HTMLInputElement;
 }
 
 /**
@@ -260,69 +307,5 @@ export class GitLabErrorPanel extends Widget {
     text.textContent = message;
     this.node.appendChild(image);
     this.node.appendChild(text);
-  }
-}
-
-/**
- * A module-Private namespace.
- */
-namespace Private {
-  /**
-   * Given a text node and an input element, replace the text
-   * node wiht the input element, allowing the user to reset the
-   * value of the text node.
-   *
-   * @param text - The node to make editable.
-   *
-   * @param edit - The input element to replace it with.
-   *
-   * @returns a Promise that resolves when the editing is complete,
-   *   or has been canceled.
-   */
-  export function changeField(
-    text: HTMLElement,
-    edit: HTMLInputElement
-  ): Promise<string> {
-    // Replace the text node with an the input element.
-    let parent = text.parentElement as HTMLElement;
-    let initialValue = text.textContent || '';
-    edit.value = initialValue;
-    parent.replaceChild(edit, text);
-    edit.focus();
-
-    // Highlight the input element
-    let index = edit.value.lastIndexOf('.');
-    if (index === -1) {
-      edit.setSelectionRange(0, edit.value.length);
-    } else {
-      edit.setSelectionRange(0, index);
-    }
-
-    return new Promise<string>((resolve, reject) => {
-      edit.onblur = () => {
-        // Set the text content of the original node, then
-        // replace the node.
-        parent.replaceChild(text, edit);
-        text.textContent = edit.value || initialValue;
-        resolve(edit.value);
-      };
-      edit.onkeydown = (event: KeyboardEvent) => {
-        switch (event.keyCode) {
-          case 13: // Enter
-            event.stopPropagation();
-            event.preventDefault();
-            edit.blur();
-            break;
-          case 27: // Escape
-            event.stopPropagation();
-            event.preventDefault();
-            edit.value = initialValue;
-            edit.blur();
-            break;
-          default:
-            break;
-        }
-      };
-    });
   }
 }
