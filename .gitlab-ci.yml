@@ -16,6 +16,7 @@ test-python37:
   image: continuumio/miniconda:latest
   before_script:
     - conda create -n jupyterlab-ext -y -c conda-forge python=3.7 jupyterlab nodejs
+    - source /opt/conda/etc/profile.d/conda.sh
     - conda activate jupyterlab-ext
   script:
     - jlpm install
