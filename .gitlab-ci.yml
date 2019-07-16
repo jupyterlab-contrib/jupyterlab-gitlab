@@ -30,6 +30,8 @@ release-npm:
   before_script:
     - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
   script:
+    - npm install
+    - npm run build
     - npm publish
   only:
     - tags
