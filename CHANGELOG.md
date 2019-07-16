@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.2.1 (2019-07-16)
+
+- Fix invalid npm package
+
 ## Version 0.2.0 (2019-07-09)
 
 - Update for JupyterLab 1.0
