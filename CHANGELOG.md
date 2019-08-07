@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.3.0 (2019-08-07)
+
+- Fix incompatibility with JupyterLab >= 1.0.2
+- Display repo name instead of repo path (requires JupyterLab >= 1.0.3)
+
 ## Version 0.2.1 (2019-07-16)
 
 - Fix invalid npm package
