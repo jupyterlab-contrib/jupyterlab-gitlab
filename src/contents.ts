@@ -686,9 +686,7 @@ namespace Private {
     // If it is a directory, convert to that.
     let content: Contents.IModel[] = repos.map(repo => {
       return {
-        // use the repo path instead of the name
-        // otherwise we won't be able to browse it if they differ
-        name: repo.path,
+        name: repo.name,
         path: repo.path_with_namespace,
         format: 'json',
         type: 'directory',
