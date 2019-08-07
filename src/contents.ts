@@ -689,7 +689,7 @@ namespace Private {
         // use the repo path instead of the name
         // otherwise we won't be able to browse it if they differ
         name: repo.path,
-        path: repo.path,
+        path: repo.path_with_namespace,
         format: 'json',
         type: 'directory',
         created: '',
