@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.0.0 (2020-03-18)
+
+- Pass token in header instead of parameter
+  (allow to pass OAuth2 token)
+
 ## Version 0.3.0 (2019-08-07)
 
 - Fix incompatibility with JupyterLab >= 1.0.2
