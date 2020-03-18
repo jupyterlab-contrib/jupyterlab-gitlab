@@ -7,11 +7,13 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { FileBrowser } from '@jupyterlab/filebrowser';
 
-import { Message } from '@phosphor/messaging';
+import { refreshIcon } from '@jupyterlab/ui-components';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { ISignal, Signal } from '@lumino/signaling';
+
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { GitLabDrive, parsePath } from './contents';
 
@@ -58,7 +60,7 @@ export class GitLabFileBrowser extends Widget {
         }
         window.open(url);
       },
-      iconClassName: 'jp-GitLab-icon jp-Icon jp-Icon-16',
+      iconClass: 'jp-GitLab-icon jp-Icon jp-Icon-16',
       tooltip: 'Open this repository on GitLab'
     });
     this._openGitLabButton.addClass('jp-GitLab-toolbar-item');
@@ -67,7 +69,7 @@ export class GitLabFileBrowser extends Widget {
     // Add our own refresh button, since the other one is hidden
     // via CSS.
     let refresher = new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon jp-Icon jp-Icon-16',
+      icon: refreshIcon,
       onClick: () => {
         this._browser.model.refresh();
       },
