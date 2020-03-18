@@ -9,7 +9,7 @@ import {
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
