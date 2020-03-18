@@ -42,7 +42,7 @@ class GitLabConfig(Configurable):
         "https://gitlab.com", config=True, help="The url for the GitLab instance."
     )
     access_token = Unicode(
-        "", config=True, help=("A personal access token for GitLab.")
+        "", config=True, help=("A personal access or OAuth2 token for GitLab.")
     )
     validate_cert = Bool(
         True,
@@ -94,7 +94,7 @@ class GitLabHandler(APIHandler):
 
             access_token = params.pop("private_token", None)
             if access_token and c.allow_client_side_access_token:
-                params["private_token"] = access_token
+                token = access_token
             elif access_token and not c.allow_client_side_access_token:
                 msg = (
                     "Client side (JupyterLab) access tokens have been "
@@ -105,12 +105,21 @@ class GitLabHandler(APIHandler):
                 )
                 raise HTTPError(403, msg)
             elif c.access_token != "":
-                params["private_token"] = c.access_token
+                token = c.access_token
+            else:
+                token = ""
 
+            if token:
+                headers = {"Authorization": "Bearer {}".format(token)}
+            else:
+                headers = {}
             api_path = url_concat(api_path, params)
             client = AsyncHTTPClient()
             request = HTTPRequest(
-                api_path, validate_cert=c.validate_cert, user_agent="JupyterLab GitLab"
+                api_path,
+                validate_cert=c.validate_cert,
+                user_agent="JupyterLab GitLab",
+                headers=headers,
             )
             response = yield client.fetch(request)
             data = json.loads(response.body.decode("utf-8"))

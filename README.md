@@ -57,6 +57,7 @@ As discussed above, this extension has both a server extension and a lab extensi
 We recommend installing both to allow authentication and pagination.
 The purpose of the server extension is to add GitLab credentials that you will need to acquire
 from https://gitlab.com/profile/personal_access_tokens, and then to proxy your request to GitLab.
+Note that OAuth2 token are also supported.
 
 ### 1. Installing the lab extension
 
@@ -114,6 +115,7 @@ c.GitLabConfig.access_token = "< YOUR_ACCESS_TOKEN >"
 ```
 
 where `< YOUR_ACCESS_TOKEN >` is the string value you obtained above.
+It can also be an OAuth2 token.
 
 ## Customization
 
