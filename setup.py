@@ -17,7 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://gitlab.com/beenje/jupyterlab-gitlab",
     license="BSD",
-    version="1.0.0",
+    version="2.0.0",
     install_requires=["notebook"],
     py_modules=["jupyterlab_gitlab"],
     include_package_data=True,

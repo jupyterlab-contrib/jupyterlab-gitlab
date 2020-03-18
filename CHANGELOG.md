@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.0.0 (2020-03-18)
+
+- Update for JupyterLab 2.0
+  (not compatible with JupyterLab 1.x)
+
 ## Version 1.0.0 (2020-03-18)
 
 - Pass token in header instead of parameter
