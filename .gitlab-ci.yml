@@ -1,9 +1,17 @@
 stages:
   - check
+  - build
   - test
   - release
 
-check:
+.jupyterlab_ext:
+  image: condaforge/miniforge3:latest
+  before_script:
+    - source /opt/conda/etc/profile.d/conda.sh
+    - conda create -n jupyterlab-ext -y python=3 jupyterlab=3 jupyter-packaging nodejs=14
+    - conda activate jupyterlab-ext
+
+run-pre-commit:
   stage: check
   image: python:3.6
   before_script:
@@ -11,18 +19,30 @@ check:
   script:
     - pre-commit run --all-files
 
-test-python37:
-  stage: test
-  image: continuumio/miniconda:latest
-  before_script:
-    - conda create -n jupyterlab-ext -y -c conda-forge python=3.7 jupyterlab=3 nodejs
-    - source /opt/conda/etc/profile.d/conda.sh
-    - conda activate jupyterlab-ext
+run-eslint:
+  extends: .jupyterlab_ext
+  stage: check
   script:
-    - jlpm install
-    - jlpm run build
-    - jupyter labextension install
-    - pip install .
+    - jlpm
+    - jlpm run eslint:check
+
+build-package:
+  extends: .jupyterlab_ext
+  stage: build
+  script:
+    - python setup.py check sdist bdist_wheel
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist/
+
+test-python3:
+  extends: .jupyterlab_ext
+  stage: test
+  script:
+    - python -m pip install dist/jupyterlab*.whl
+    - jupyter server extension list 2>&1 | grep -ie "jupyterlab_gitlab.*OK"
+    - jupyter labextension list 2>&1 | grep -ie "jupyterlab-gitlab.*OK"
 
 release-npm:
   stage: release
@@ -42,7 +62,6 @@ release-pypi:
   before_script:
     - pip install twine
   script:
-    - python setup.py check sdist bdist_wheel
     - twine upload dist/*
   only:
     - tags
