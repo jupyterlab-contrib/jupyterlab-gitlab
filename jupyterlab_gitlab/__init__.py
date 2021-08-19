@@ -1,8 +1,7 @@
-
 import json
 from pathlib import Path
 
-from ._version import __version__
+from ._version import __version__  # noqa
 from .gitlab import setup_handlers
 
 HERE = Path(__file__).parent.resolve()
@@ -10,17 +9,13 @@ HERE = Path(__file__).parent.resolve()
 with (HERE / "labextension" / "package.json").open() as fid:
     data = json.load(fid)
 
+
 def _jupyter_labextension_paths():
-    return [{
-        "src": "labextension",
-        "dest": data["name"]
-    }]
+    return [{"src": "labextension", "dest": data["name"]}]
 
 
 def _jupyter_server_extension_points():
-    return [{
-        "module": "jupyterlab_gitlab"
-    }]
+    return [{"module": "jupyterlab_gitlab"}]
 
 
 def _load_jupyter_server_extension(server_app):
@@ -33,6 +28,6 @@ def _load_jupyter_server_extension(server_app):
     """
     setup_handlers(server_app.web_app)
 
+
 # For backward compatibility with notebook server - useful for Binder/JupyterHub
 load_jupyter_server_extension = _load_jupyter_server_extension
-
