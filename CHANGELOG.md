@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 3.0.0 (2021-08-19)
+
+- Update for JupyterLab 3.1
+  (not compatible with JupyterLab 2.x)
+
 ## Version 2.0.0 (2020-03-18)
 
 - Update for JupyterLab 2.0
