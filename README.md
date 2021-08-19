@@ -9,6 +9,16 @@ Thanks as well to [Mark Ghiorso](https://gitlab.com/ghiorso) for the [jupyterlab
 extension where I took some inspiration. It didn't fit my needs (no server extension) so I decided to create my own based on a recent
 version of jupyterlab-github instead (v0.10.0).
 
+This extension is composed of a Python package named `jupyterlab_gitlab`
+for the server extension and a NPM package named `jupyterlab-gitlab`
+for the frontend extension.
+
+The purpose of the server extension is to add GitLab credentials that you will need to acquire
+from https://gitlab.com/profile/personal_access_tokens, and then to proxy your request to GitLab.
+Note that OAuth2 token are also supported.
+
+## Introduction
+
 ### What this extension is
 
 When you install this extension, an additional filebrowser tab will be added
@@ -31,50 +41,34 @@ saving files, making commits, forking repositories, etc.
 If you want to use git from JupyterLab, you should look at the
 [jupyterlab-git](https://github.com/jupyterlab/jupyterlab-git) extension.
 
-### Remarks
+## Requirements
 
-This extension has both a client-side component (that is, Javascript that is bundled
-with JupyterLab), and a server-side component (that is, Python code that is added
-to the Jupyter notebook server). This extension _will_ work without the server extension,
-with some drawbacks:
-
-- requests will be unauthenticated and only give access to public repositories
-- unauthenticated requests can impose rate-limits depending on your GitLab instance
-  (meaning you might have to wait before regaining access)
-- only the 20 first results are returned (pagination links are not followed)
-
-For those reasons, you should set up the server extension as well as the lab extension.
-This process is described in the [installation](#Installation) section.
-
-## Prerequisites
-
-- JupyterLab 1.x for version < 2.0
-- JupyterLab 2.0 for version >= 2.0
-- A GitLab account for the server extension
+* JupyterLab >= 3.0
+* JupyterLab 1.x for version 1.x
+* JupyterLab 2.x for version 2.x
+* JupyterLab 3.x for version 3.x
+* A GitLab account for the server extension
 
 ## Installation
 
-As discussed above, this extension has both a server extension and a lab extension.
-We recommend installing both to allow authentication and pagination.
-The purpose of the server extension is to add GitLab credentials that you will need to acquire
-from https://gitlab.com/profile/personal_access_tokens, and then to proxy your request to GitLab.
-Note that OAuth2 token are also supported.
+### Install the server and lab extension
 
-### 1. Installing the lab extension
+For Jupyterlab >= 3.0, both extensions are installed from the Python package:
 
-To install the lab extension, enter the following in your terminal:
+```bash
+pip install jupyterlab-gitlab
+```
+
+For Jupyterlab < 3.0, you have to install the server and lab extensions separately:
 
 ```bash
 jupyter labextension install jupyterlab-gitlab
+pip install jupyterlab-gitlab
 ```
 
-With only this installed, the extension should work.
+### Getting your credentials from GitLab
 
-### 2. Getting your credentials from GitLab
-
-You need to create a personal access token to authenticate yourself to GitLab.
-
-1. Go to https://gitlab.com/profile/personal_access_tokens or from GitLab, go to your `Settings`_ > `Access Tokens`_.
+1. Go to <https://gitlab.com/profile/personal_access_tokens> or from GitLab, go to your `Settings` > `Access Tokens`.
 1. Under `Name`, enter a short description, to identify the purpose
    of this token. I recommend something like: `jupyterlab-gitlab`.
 1. Under Scopes, check the `api` scope.
@@ -84,27 +78,6 @@ You need to create a personal access token to authenticate yourself to GitLab.
 
 This is the only time you'll see this token in GitLab. If you lose it, you'll
 need to create another one.
-
-### 3. Installing the server extension
-
-Install the server extension using pip, and then enable it:
-
-```bash
-pip install jupyterlab-gitlab
-```
-
-If you are running Notebook 5.3 or later, this will automatically enable the extension.
-If not, enable the server extension by running:
-
-```bash
-jupyter serverextension enable --sys-prefix jupyterlab_gitlab
-```
-
-You can check if the server extension is enabled by running:
-
-```bash
-jupyter serverextension list
-```
 
 You should now add the credentials you got from GitLab to your notebook configuration file.
 Instructions for generating a configuration file can be found
@@ -152,3 +125,69 @@ and `repository` is the name of the repository you want to open.
 
 The `baseUrl` can also be updated to point to your own GitLab instance.
 If you use the server extension, this url is only used for the `Open this repository on GitLab` button.
+
+## Troubleshoot
+
+If you are seeing the frontend extension, but it is not working, check
+that the server extension is enabled:
+
+```bash
+jupyter server extension list
+```
+
+If the server extension is installed and enabled, but you are not seeing
+the frontend extension, check the frontend extension is installed:
+
+```bash
+jupyter labextension list
+```
+
+## Contributing
+
+### Development install
+
+Note: You will need NodeJS to build the extension package.
+
+The `jlpm` command is JupyterLab's pinned version of
+[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
+`yarn` or `npm` in lieu of `jlpm` below.
+
+```bash
+# Clone the repo to your local environment
+# Change directory to the jupyterlab-gitlab directory
+# Install package in development mode
+pip install -e .
+# Link your development version of the extension with JupyterLab
+jupyter labextension develop . --overwrite
+# Rebuild extension Typescript source after making changes
+jlpm run build
+```
+
+You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
+
+```bash
+# Watch the source directory in one terminal, automatically rebuilding when needed
+jlpm run watch
+# Run JupyterLab in another terminal
+jupyter lab
+```
+
+With the watch command running, every saved change will immediately be built locally and available in your running JupyterLab. Refresh JupyterLab to load the change in your browser (you may need to wait several seconds for the extension to be rebuilt).
+
+By default, the `jlpm run build` command generates the source maps for this extension to make it easier to debug using the browser dev tools. To also generate source maps for the JupyterLab core extensions, you can run the following command:
+
+```bash
+jupyter lab build --minimize=False
+```
+
+### Uninstall
+
+```bash
+pip uninstall jupyterlab-gitlab
+```
+
+For JupyterLab < 3, you will also need to run the following command after removing the Python package:
+
+```bash
+jupyter labextension uninstall jupyterlab-gitlab
+```
