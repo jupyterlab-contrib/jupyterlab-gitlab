@@ -21,5 +21,6 @@
       "default": ""
     }
   },
-  "type": "object"
+  "type": "object",
+  "additionalProperties": false
 }

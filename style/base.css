@@ -1,0 +1,106 @@
+.jp-GitLab-icon {
+  background-image: url(gitlab_stacked_wm_grayscale.svg);
+}
+
+.jp-GitLabBrowser {
+  background-color: var(--jp-layout-color1);
+  height: 100%;
+}
+
+.jp-GitLabBrowser .jp-FileBrowser {
+  flex-grow: 1;
+  height: 100%;
+}
+
+.jp-GitLabUserInput {
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+  font-size: large;
+  padding: 0px;
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item.jp-GitLabUserInput {
+  flex: 8 8;
+}
+
+.jp-GitLabUserInput-wrapper {
+  background-color: var(--jp-input-active-background);
+  border: var(--jp-border-width) solid var(--jp-border-color2);
+  height: 30px;
+  padding: 0 0 0 12px;
+  margin: 0 4px 0 0;
+}
+
+.jp-GitLabUserInput-wrapper:focus-within {
+  border: var(--jp-border-width) solid var(--md-blue-500);
+  box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+.jp-GitLabUserInput-wrapper input {
+  background: transparent;
+  float: left;
+  border: none;
+  outline: none;
+  font-size: var(--jp-ui-font-size3);
+  color: var(--jp-ui-font-color0);
+  width: calc(100% - 18px);
+  line-height: 28px;
+}
+
+.jp-GitLabUserInput-wrapper input::placeholder {
+  color: var(--jp-ui-font-color3);
+  font-size: var(--jp-ui-font-size1);
+  text-transform: uppercase;
+}
+
+.jp-GitLabBrowser .jp-ToolbarButton.jp-Toolbar-item.jp-GitLab-toolbar-item {
+  display: block;
+}
+
+.jp-GitLabBrowser .jp-ToolbarButton.jp-Toolbar-item {
+  display: none;
+}
+
+.jp-GitLabBrowser .jp-DirListing-headerItem.jp-id-modified {
+  display: none;
+}
+
+.jp-GitLabBrowser .jp-DirListing-itemModified {
+  display: none;
+}
+
+.jp-GitLabErrorPanel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--jp-layout-color2);
+}
+
+.jp-GitLabErrorImage {
+  background-size: 100%;
+  width: 200px;
+  height: 165px;
+  background-image: url(gitlab-logo-extra-whitespace.svg);
+}
+
+.jp-GitLabErrorText {
+  font-size: var(--jp-ui-font-size3);
+  color: var(--jp-ui-font-color1);
+  text-align: center;
+  padding: 12px;
+}
+
+#setting-editor .jp-PluginList-icon.jp-GitLab-icon {
+  background-size: 85%;
+  background-repeat: no-repeat;
+  background-position: center;
+}

@@ -44,9 +44,10 @@ export class GitLabFileBrowser extends Widget {
           window.open(url);
           return;
         }
-        const localPath = this._browser.model.manager.services.contents.localPath(
-          this._browser.model.path
-        );
+        const localPath =
+          this._browser.model.manager.services.contents.localPath(
+            this._browser.model.path
+          );
         const resource = parsePath(localPath);
         url = URLExt.join(url, resource.user);
         if (resource.repository) {
@@ -68,7 +69,7 @@ export class GitLabFileBrowser extends Widget {
 
     // Add our own refresh button, since the other one is hidden
     // via CSS.
-    let refresher = new ToolbarButton({
+    const refresher = new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
         this._browser.model.refresh();
@@ -178,7 +179,7 @@ export class GitLabFileBrowser extends Widget {
 
   private _browser: FileBrowser;
   private _drive: GitLabDrive;
-  private _errorPanel: GitLabErrorPanel | null;
+  private _errorPanel: GitLabErrorPanel | null = null;
   private _openGitLabButton: ToolbarButton;
   private _changeGuard = false;
 }

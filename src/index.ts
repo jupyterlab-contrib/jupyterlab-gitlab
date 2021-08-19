@@ -19,8 +19,6 @@ import { GitLabDrive, DEFAULT_GITLAB_BASE_URL } from './contents';
 
 import { GitLabFileBrowser } from './browser';
 
-import '../style/index.css';
-
 /**
  * GitLab filebrowser plugin state namespace.
  */
