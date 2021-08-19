@@ -94,7 +94,9 @@ export class GitLabDrive implements Contents.IDrive {
   /**
    * Settings for the notebook server.
    */
-  readonly serverSettings: ServerConnection.ISettings;
+  get serverSettings(): ServerConnection.ISettings {
+    return this._serverSettings;
+  }
 
   /**
    * State for whether the drive is being rate limited by GitLab.
@@ -104,7 +106,7 @@ export class GitLabDrive implements Contents.IDrive {
   /**
    * A signal emitted when a file operation takes place.
    */
-  get fileChanged(): ISignal<this, Contents.IChangedArgs> {
+  get fileChanged(): ISignal<Contents.IDrive, Contents.IChangedArgs> {
     return this._fileChanged;
   }
 
@@ -463,13 +465,13 @@ export class GitLabDrive implements Contents.IDrive {
    */
   private _apiRequest<T>(apiPath: string): Promise<T> {
     return this._useProxy.then(useProxy => {
-      let parts = apiPath.split('?');
+      const parts = apiPath.split('?');
       let path = parts[0];
-      let query = (parts[1] || '').split('&');
-      let params: { [key: string]: string } = {};
+      const query = (parts[1] || '').split('&');
+      const params: { [key: string]: string } = {};
       for (const param of query) {
         if (param) {
-          let [key, value] = param.split('=');
+          const [key, value] = param.split('=');
           params[key] = value;
         }
       }
@@ -491,7 +493,7 @@ export class GitLabDrive implements Contents.IDrive {
         }
         requestUrl = URLExt.join(requestUrl, path);
       }
-      let newQuery = Object.keys(params)
+      const newQuery = Object.keys(params)
         .map(key => `${key}=${params[key]}`)
         .join('&');
       requestUrl += '?' + newQuery;
@@ -503,7 +505,7 @@ export class GitLabDrive implements Contents.IDrive {
     });
   }
 
-  private _baseUrl: string;
+  private _baseUrl = '';
   private _accessToken: string | null | undefined;
   private _validUser = false;
   private _serverSettings: ServerConnection.ISettings;
@@ -605,6 +607,7 @@ namespace Private {
       } as Contents.IModel;
     } else if (
       contents.type === 'blob' ||
+      // eslint-disable-next-line no-prototype-builtins
       contents.hasOwnProperty('file_name')
     ) {
       // If it is a file or blob, convert to a file
@@ -684,7 +687,7 @@ namespace Private {
    */
   export function reposToDirectory(repos: GitLabRepo[]): Contents.IModel {
     // If it is a directory, convert to that.
-    let content: Contents.IModel[] = repos.map(repo => {
+    const content: Contents.IModel[] = repos.map(repo => {
       return {
         name: repo.name,
         path: repo.path_with_namespace,
@@ -751,8 +754,6 @@ namespace Private {
    * https://docs.python.org/3/library/base64.html#base64.urlsafe_b64decode
    */
   export function b64EncodeUrlSafe(str: string): string {
-    return btoa(str)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_');
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_');
   }
 }

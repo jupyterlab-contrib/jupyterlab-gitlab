@@ -61,7 +61,7 @@ export function proxiedApiRequest<T>(
  *   "mode": "040000"
  * },
  */
-export class GitLabContents {
+export interface GitLabContents {
   /**
    * The type of the file.
    */
@@ -106,7 +106,7 @@ export class GitLabContents {
  *   "last_commit_id": "570e7b2abdd848b95f2f578043fc23bd6f6fd24d"
  * }
  */
-export class GitLabFileContents extends GitLabContents {
+export interface GitLabFileContents extends GitLabContents {
   /**
    * The type of the contents.
    */
@@ -158,7 +158,7 @@ export class GitLabFileContents extends GitLabContents {
  *     "size": 17
  * }
  */
-export class GitLabBlob {
+export interface GitLabBlob {
   /**
    * The base64-encoded contents of the file.
    */
@@ -187,7 +187,7 @@ export class GitLabBlob {
  * #### Notes
  *   This is incomplete.
  */
-export class GitLabRepo {
+export interface GitLabRepo {
   /**
    * ID for the repository.
    */
