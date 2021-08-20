@@ -30,7 +30,8 @@ build-package:
   extends: .jupyterlab_ext
   stage: build
   script:
-    - python setup.py check sdist bdist_wheel
+    - pip install build
+    - python -m build .
   artifacts:
     expire_in: 1 week
     paths:
