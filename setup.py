@@ -1,5 +1,5 @@
 """
-jupyterlab-gitlab setup
+jupyterlab_gitlab setup
 """
 import json
 import sys
@@ -10,7 +10,7 @@ import setuptools
 HERE = Path(__file__).parent.resolve()
 
 # The name of the project
-name = "jupyterlab-gitlab"
+name = "jupyterlab_gitlab"
 
 lab_path = HERE / name.replace("-", "_") / "labextension"
 
@@ -28,14 +28,14 @@ data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str("."), "install.json"),
     (
         "etc/jupyter/jupyter_server_config.d",
-        "jupyter-config/server-config",
-        "jupyterlab-gitlab.json",
+        "jupyter-config/jupyter_server_config.d",
+        "jupyterlab_gitlab.json",
     ),
     # For backward compatibility with notebook server
     (
         "etc/jupyter/jupyter_notebook_config.d",
-        "jupyter-config/nb-config",
-        "jupyterlab-gitlab.json",
+        "jupyter-config/jupyter_notebook_config.d",
+        "jupyterlab_gitlab.json",
     ),
 ]
 
