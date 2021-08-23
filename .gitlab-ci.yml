@@ -45,18 +45,6 @@ test-python3:
     - jupyter server extension list 2>&1 | grep -ie "jupyterlab_gitlab.*OK"
     - jupyter labextension list 2>&1 | grep -ie "jupyterlab-gitlab.*OK"
 
-release-npm:
-  stage: release
-  image: node:latest
-  before_script:
-    - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' > ~/.npmrc
-  script:
-    - npm install
-    - npm run build
-    - npm publish
-  only:
-    - tags
-
 release-pypi:
   stage: release
   image: python:3.7
