@@ -8,12 +8,12 @@ stages:
   image: condaforge/miniforge3:latest
   before_script:
     - source /opt/conda/etc/profile.d/conda.sh
-    - conda create -n jupyterlab-ext -y python=3 jupyterlab=3 jupyter-packaging nodejs=14
+    - conda create -n jupyterlab-ext -y python=3 jupyterlab=4 nodejs=18
     - conda activate jupyterlab-ext
 
 run-pre-commit:
   stage: check
-  image: python:3.6
+  image: python:3.9
   before_script:
     - pip install pre-commit
   script:
@@ -47,7 +47,7 @@ test-python3:
 
 release-pypi:
   stage: release
-  image: python:3.7
+  image: python:3.9
   before_script:
     - pip install twine
   script:
