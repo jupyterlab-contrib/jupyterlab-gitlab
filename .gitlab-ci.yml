@@ -5,10 +5,10 @@ stages:
   - release
 
 .jupyterlab_ext:
-  image: condaforge/miniforge3:latest
+  image: condaforge/mambaforge:latest
   before_script:
     - source /opt/conda/etc/profile.d/conda.sh
-    - conda create -n jupyterlab-ext -y python=3 jupyterlab=4 nodejs=18
+    - mamba create -n jupyterlab-ext -y python=3 jupyterlab=4 nodejs=18
     - conda activate jupyterlab-ext
 
 run-pre-commit:
