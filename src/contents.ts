@@ -196,10 +196,11 @@ export class GitLabDrive implements Contents.IDrive {
         // GET /projects/:id/repository/files/:file_path
         // Note that:
         // - we can't use GET /projects/:id/repository/tree?path=file_path (it returns 200 with an empty [])
-        // - ref is required and hard coded to master
+        // - ref is required
         endUrl =
           URLExt.join('files', encodeURIComponent(resource.path)) +
-          '?ref=master';
+          '?ref=' +
+          this._defaultBranch;
       } else {
         // Get a list of repository files and directories in the project
         // https://docs.gitlab.com/ee/api/repositories.html#list-repository-tree
@@ -209,6 +210,17 @@ export class GitLabDrive implements Contents.IDrive {
           '?path=' + encodeURIComponent(resource.path)
         );
       }
+    } else {
+      // Retrieve and initialize the project default branch
+      const projectApi = URLExt.join(
+        'projects',
+        encodeURIComponent(resource.user) +
+          '%2F' +
+          encodeURIComponent(resource.repository)
+      );
+      this._apiRequest<GitLabRepo>(projectApi).then(contents => {
+        this._defaultBranch = contents.default_branch;
+      });
     }
     // Use namespaced API calls: resource.user + '%2F' + resource.repository
     // See https://docs.gitlab.com/ee/api/README.html#namespaced-path-encoding
@@ -291,7 +303,9 @@ export class GitLabDrive implements Contents.IDrive {
         'files',
         encodeURIComponent(resource.path),
         'raw'
-      ) + '?ref=master';
+      ) +
+      '?ref=' +
+      this._defaultBranch;
     return Promise.resolve(rawUrl);
   }
 
@@ -508,6 +522,7 @@ export class GitLabDrive implements Contents.IDrive {
   private _baseUrl = '';
   private _accessToken: string | null | undefined;
   private _validUser = false;
+  private _defaultBranch = '';
   private _serverSettings: ServerConnection.ISettings;
   private _useProxy: Promise<boolean>;
   private _fileTypeForPath: (path: string) => DocumentRegistry.IFileType;
