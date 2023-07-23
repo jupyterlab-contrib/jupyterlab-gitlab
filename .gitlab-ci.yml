@@ -42,7 +42,9 @@ test-python3:
   stage: test
   script:
     - python -m pip install dist/jupyterlab*.whl
+    - jupyter server extension list
     - jupyter server extension list 2>&1 | grep -ie "jupyterlab_gitlab.*OK"
+    - jupyter labextension list
     - jupyter labextension list 2>&1 | grep -ie "jupyterlab-gitlab.*OK"
 
 release-pypi:
