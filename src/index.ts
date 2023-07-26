@@ -9,6 +9,8 @@ import {
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
@@ -19,6 +21,8 @@ import { GitLabDrive, DEFAULT_GITLAB_BASE_URL } from './contents';
 
 import { GitLabFileBrowser } from './browser';
 
+import GitLabSvgStr from '../style/gitlab_stacked_wm_grayscale.svg';
+
 /**
  * GitLab filebrowser plugin state namespace.
  */
@@ -28,6 +32,14 @@ const NAMESPACE = 'gitlab-filebrowser';
  * The ID for the plugin.
  */
 const PLUGIN_ID = 'jupyterlab-gitlab:drive';
+
+/**
+ * GitLab Icon class.
+ */
+export const gitLabIcon = new LabIcon({
+  name: `${NAMESPACE}:icon`,
+  svgstr: GitLabSvgStr
+});
 
 /**
  * The JupyterLab plugin for the GitLab Filebrowser.
@@ -69,7 +81,8 @@ function activateFileBrowser(
 
   const gitLabBrowser = new GitLabFileBrowser(browser, drive);
 
-  gitLabBrowser.title.iconClass = 'jp-GitLab-icon jp-SideBar-tabIcon';
+  gitLabBrowser.title.icon = gitLabIcon;
+  gitLabBrowser.title.iconClass = 'jp-SideBar-tabIcon';
   gitLabBrowser.title.caption = 'Browse GitLab';
 
   gitLabBrowser.id = 'gitlab-file-browser';

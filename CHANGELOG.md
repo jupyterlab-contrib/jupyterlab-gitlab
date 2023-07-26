@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 4.0.0 (2021-08-23)
+
+- Update for JupyterLab 4.0
+  (not compatible with JupyterLab 3.x)
+- Get the project default branch from the API
+
 ## Version 3.0.0 (2021-08-19)
 
 - Update for JupyterLab 3.1

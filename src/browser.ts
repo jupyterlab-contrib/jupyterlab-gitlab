@@ -108,7 +108,7 @@ export class GitLabFileBrowser extends Widget {
       // appears to revert to document.body. If the user has subsequently
       // focused another element, don't focus the browser listing.
       if (document.activeElement === document.body) {
-        const listing = (this._browser.layout as PanelLayout).widgets[3];
+        const listing = (this._browser.layout as PanelLayout).widgets[1];
         listing.node.focus();
       }
     });
@@ -147,7 +147,7 @@ export class GitLabFileBrowser extends Widget {
 
     // If we currently have an error panel, remove it.
     if (this._errorPanel) {
-      const listing = (this._browser.layout as PanelLayout).widgets[3];
+      const listing = (this._browser.layout as PanelLayout).widgets[1];
       listing.node.removeChild(this._errorPanel.node);
       this._errorPanel.dispose();
       this._errorPanel = null;
@@ -160,7 +160,7 @@ export class GitLabFileBrowser extends Widget {
           'You will need to wait about an hour before ' +
           'continuing'
       );
-      const listing = (this._browser.layout as PanelLayout).widgets[3];
+      const listing = (this._browser.layout as PanelLayout).widgets[1];
       listing.node.appendChild(this._errorPanel.node);
       return;
     }
@@ -171,7 +171,7 @@ export class GitLabFileBrowser extends Widget {
         ? `"${resource.user}" appears to be an invalid user name!`
         : 'Please enter a GitLab user name';
       this._errorPanel = new GitLabErrorPanel(message);
-      const listing = (this._browser.layout as PanelLayout).widgets[3];
+      const listing = (this._browser.layout as PanelLayout).widgets[1];
       listing.node.appendChild(this._errorPanel.node);
       return;
     }
