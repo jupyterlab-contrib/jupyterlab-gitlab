@@ -1,5 +1,9 @@
 # Changelog
 
+<!-- <START NEW CHANGELOG ENTRY> -->
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## Version 4.0.0 (2021-08-23)
 
 - Update for JupyterLab 4.0
