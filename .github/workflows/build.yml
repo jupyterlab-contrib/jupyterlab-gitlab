@@ -91,4 +91,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
+      - name: Check links
+        uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
+        with:
+          ignore_links: 'https://gitlab.com/profile/personal_access_tokens'
