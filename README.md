@@ -82,7 +82,7 @@ need to create another one.
 
 You should now add the credentials you got from GitLab to your notebook configuration file.
 Instructions for generating a configuration file can be found
-[here](http://jupyter-notebook.readthedocs.io/en/stable/config_overview.html#configure-nbserver).
+[here](https://jupyter-notebook.readthedocs.io/en/stable/configuring/config_overview.html#configure-jupyter-server).
 Once you have identified this file, add the following line to it:
 
 ```python
