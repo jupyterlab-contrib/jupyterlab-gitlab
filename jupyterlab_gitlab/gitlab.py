@@ -4,8 +4,7 @@ import re
 import json
 import copy
 
-import tornado
-import tornado.gen as gen
+from tornado import web
 from tornado.httputil import url_concat
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest, HTTPError
 
@@ -25,20 +24,22 @@ class GitLabConfig(Configurable):
 
     allow_client_side_access_token = Bool(
         False,
-        config=True,
         help=(
             "If True the access token specified in the JupyterLab settings "
             "will take precedence. If False the token specified in JupyterLab "
             "will be ignored. Storing your access token in the client can "
             "present a security risk so be careful if enabling this setting."
         ),
+    ).tag(config=True)
+
+    url = Unicode("https://gitlab.com", help="The url for the GitLab instance.").tag(
+        config=True
     )
-    url = Unicode(
-        "https://gitlab.com", config=True, help="The url for the GitLab instance."
-    )
+
     access_token = Unicode(
-        "", config=True, help=("A personal access or OAuth2 token for GitLab.")
-    )
+        "", help=("A personal access or OAuth2 token for GitLab.")
+    ).tag(config=True)
+
     validate_cert = Bool(
         True,
         config=True,
@@ -47,7 +48,7 @@ class GitLabConfig(Configurable):
             "made to the GitLab api. In general this is a bad idea so only "
             "disable SSL validation if you know what you are doing!"
         ),
-    )
+    ).tag(config=True)
 
 
 class GitLabHandler(APIHandler):
@@ -59,9 +60,10 @@ class GitLabHandler(APIHandler):
     unauthenticated calls is so limited as to be practically useless.
     """
 
-    @tornado.web.authenticated
-    @gen.coroutine
-    def get(self, path):
+    client = AsyncHTTPClient()
+
+    @web.authenticated
+    async def get(self, path):
         """
         Proxy API requests to GitLab, adding authentication parameter(s) if
         they have been set.
@@ -110,14 +112,14 @@ class GitLabHandler(APIHandler):
             else:
                 headers = {}
             api_path = url_concat(api_path, params)
-            client = AsyncHTTPClient()
+
             request = HTTPRequest(
                 api_path,
                 validate_cert=c.validate_cert,
                 user_agent="JupyterLab GitLab",
                 headers=headers,
             )
-            response = yield client.fetch(request)
+            response = await self.client.fetch(request)
             data = json.loads(response.body.decode("utf-8"))
 
             # Check if we need to paginate results.
@@ -127,7 +129,7 @@ class GitLabHandler(APIHandler):
             while next_page_path:
                 request = copy.copy(request)
                 request.url = next_page_path
-                response = yield client.fetch(request)
+                response = await self.client.fetch(request)
                 next_page_path = self._maybe_get_next_page_path(response)
                 data.extend(json.loads(response.body.decode("utf-8")))
 

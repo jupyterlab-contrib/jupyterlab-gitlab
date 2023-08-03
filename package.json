@@ -8,9 +8,9 @@
     "jupyterlab",
     "jupyterlab-extension"
   ],
-  "homepage": "https://gitlab.com/beenje/jupyterlab-gitlab",
+  "homepage": "https://github.com/jupyterlab-contrib/jupyterlab-gitlab",
   "bugs": {
-    "url": "https://gitlab.com/beenje/jupyterlab-gitlab/issues"
+    "url": "https://github.com/jupyterlab-contrib/jupyterlab-gitlab/issues"
   },
   "license": "BSD-3-Clause",
   "author": {
@@ -33,7 +33,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/beenje/jupyterlab-gitlab"
+    "url": "https://github.com/jupyterlab-contrib/jupyterlab-gitlab"
   },
   "scripts": {
     "build": "jlpm build:lib && jlpm build:labextension:dev",
@@ -90,6 +90,8 @@
     "css-loader": "^6.7.1",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.7.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-no-null": "^1.0.2",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": "^2.4.1",
     "lint-staged": "^8.2.1",

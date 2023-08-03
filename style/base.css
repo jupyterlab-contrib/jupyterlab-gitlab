@@ -1,5 +1,5 @@
 .jp-GitLab-icon {
-  background-image: url(gitlab_stacked_wm_grayscale.svg);
+  background-image: 'url(gitlab_stacked_wm_grayscale.svg)';
 }
 
 .jp-GitLabBrowser {
@@ -17,7 +17,7 @@
   white-space: nowrap;
   text-align: center;
   font-size: large;
-  padding: 0px;
+  padding: 0;
   background-color: var(--jp-layout-color1);
 }
 
@@ -89,7 +89,7 @@
   background-size: 100%;
   width: 200px;
   height: 165px;
-  background-image: url(gitlab-logo-extra-whitespace.svg);
+  background-image: 'url(gitlab-logo-extra-whitespace.svg)';
 }
 
 .jp-GitLabErrorText {

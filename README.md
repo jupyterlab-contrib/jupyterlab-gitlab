@@ -43,12 +43,12 @@ If you want to use git from JupyterLab, you should look at the
 
 ## Requirements
 
-* JupyterLab >= 4.0
-* JupyterLab 1.x for version 1.x
-* JupyterLab 2.x for version 2.x
-* JupyterLab 3.x for version 3.x
-* JupyterLab 4.x for version 4.x
-* A GitLab account for the server extension
+- JupyterLab >= 4.0
+- JupyterLab 1.x for version 1.x
+- JupyterLab 2.x for version 2.x
+- JupyterLab 3.x for version 3.x
+- JupyterLab 4.x for version 4.x
+- A GitLab account for the server extension
 
 ## Installation
 
