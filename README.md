@@ -1,5 +1,10 @@
 # JupyterLab GitLab
 
+[![Extension status](https://img.shields.io/badge/status-ready-success 'ready to be used')](https://jupyterlab-contrib.github.io/)
+[![Github Actions Status](https://github.com/jupyterlab-contrib/jupyterlab-gitlab/workflows/Build/badge.svg)](https://github.com/jupyterlab-contrib/jupyterlab-gitlab/actions/workflows/build.yml)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab-contrib/jupyterlab-gitlab/main?urlpath=lab)
+[![PyPI](https://img.shields.io/pypi/v/jupyterlab-gitlab.svg)](https://pypi.org/project/jupyterlab-gitlab)
+
 A JupyterLab extension for browsing GitLab repositories (in read-only mode).
 
 This extension is based on [jupyterlab-github](https://github.com/jupyterlab/jupyterlab-github).
