@@ -1,0 +1,22 @@
+# a mybinder.org-ready environment for demoing jupyterlab-gitlab
+# this environment may also be used locally on Linux/MacOS/Windows, e.g.
+#
+#   conda env update --file binder/environment.yml
+#   conda activate jupyterlab-gitlab-demo
+#
+name: jupyterlab-gitlab-demo
+
+channels:
+  - conda-forge
+
+dependencies:
+  # runtime dependencies
+  - python >=3.8,<3.11.0
+  - jupyterlab >=4,<5.0.0a0
+  # labextension build dependencies
+  - nodejs >=18,<19
+  - pip
+  - wheel
+  # additional packages for demos
+  # - ipywidgets
+
