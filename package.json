@@ -109,6 +109,15 @@
     "typescript": "~5.0.2",
     "yjs": "^13.5.40"
   },
+  "resolutions": {
+    "property-expr": "2.0.3",
+    "cross-spawn": "7.0.5",
+    "braces": "3.0.3",
+    "semver": "7.5.2",
+    "json5": "2.2.2",
+    "ansi-regex": "5.0.1",
+    "simple-git": "3.27.0"
+  },
   "lint-staged": {
     "**/*{.ts,.tsx,.css,.json,.md}": [
       "prettier --write",
