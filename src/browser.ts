@@ -55,7 +55,7 @@ export class GitLabFileBrowser extends Widget {
             url,
             resource.repository,
             'tree',
-            'master',
+            this._drive.defaultBranch,
             resource.path
           );
         }
