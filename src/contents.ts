@@ -157,6 +157,13 @@ export class GitLabDrive implements Contents.IDrive {
   }
 
   /**
+   * The repository default branch
+   */
+  get defaultBranch(): string {
+    return this._defaultBranch || 'main';
+  }
+
+  /**
    * Get a file or directory.
    *
    * @param path: The path to the file.
