@@ -37,7 +37,7 @@ export class GitLabFileBrowser extends Widget {
     // Create a button that opens GitLab at the appropriate
     // repo+directory.
     this._openGitLabButton = new ToolbarButton({
-      onClick: () => {
+      onClick: async () => {
         let url = this._drive.baseUrl;
         // If there is no valid user, open the GitLab homepage.
         if (!this._drive.validUser) {
@@ -51,11 +51,15 @@ export class GitLabFileBrowser extends Widget {
         const resource = parsePath(localPath);
         url = URLExt.join(url, resource.user);
         if (resource.repository) {
+          const branch = await this._drive.getDefaultBranch(
+            resource.user,
+            resource.repository
+          );
           url = URLExt.join(
             url,
             resource.repository,
             'tree',
-            this._drive.defaultBranch,
+            branch,
             resource.path
           );
         }

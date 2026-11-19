@@ -164,6 +164,38 @@ export class GitLabDrive implements Contents.IDrive {
   }
 
   /**
+   * Get the default branch for a repository, fetching from GitLab API if not cached.
+   *
+   * @param user - The user or group name.
+   * @param repository - The repository name.
+   * @returns A promise resolving to the default branch name.
+   */
+  async getDefaultBranch(user: string, repository: string): Promise<string> {
+    const key = `${user}/${repository}`;
+    const cached = this._defaultBranches.get(key);
+    if (cached) {
+      return cached;
+    }
+    const projectApi = URLExt.join(
+      'projects',
+      encodeURIComponent(user) + '%2F' + encodeURIComponent(repository)
+    );
+    try {
+      const contents = await this._apiRequest<GitLabRepo>(projectApi);
+      const branch = contents.default_branch || 'main';
+      this._defaultBranches.set(key, branch);
+      this._defaultBranch = branch;
+      return branch;
+    } catch (err) {
+      console.warn(
+        `Could not retrieve default branch for ${key}, falling back to '${this.defaultBranch}':`,
+        err
+      );
+      return this.defaultBranch;
+    }
+  }
+
+  /**
    * Get a file or directory.
    *
    * @param path: The path to the file.
@@ -172,7 +204,7 @@ export class GitLabDrive implements Contents.IDrive {
    *
    * @returns A promise which resolves with the file content.
    */
-  get(
+  async get(
     path: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
@@ -204,10 +236,14 @@ export class GitLabDrive implements Contents.IDrive {
         // Note that:
         // - we can't use GET /projects/:id/repository/tree?path=file_path (it returns 200 with an empty [])
         // - ref is required
+        const branch = await this.getDefaultBranch(
+          resource.user,
+          resource.repository
+        );
         endUrl =
           URLExt.join('files', encodeURIComponent(resource.path)) +
           '?ref=' +
-          this._defaultBranch;
+          encodeURIComponent(branch);
       } else {
         // Get a list of repository files and directories in the project
         // https://docs.gitlab.com/ee/api/repositories.html#list-repository-tree
@@ -218,15 +254,9 @@ export class GitLabDrive implements Contents.IDrive {
         );
       }
     } else {
-      // Retrieve and initialize the project default branch
-      const projectApi = URLExt.join(
-        'projects',
-        encodeURIComponent(resource.user) +
-          '%2F' +
-          encodeURIComponent(resource.repository)
-      );
-      this._apiRequest<GitLabRepo>(projectApi).then(contents => {
-        this._defaultBranch = contents.default_branch;
+      // Warm the default branch cache for the repository
+      this.getDefaultBranch(resource.user, resource.repository).catch(() => {
+        // Ignore errors; defaultBranch getter fallback will be used if needed
       });
     }
     // Use namespaced API calls: resource.user + '%2F' + resource.repository
@@ -282,7 +312,7 @@ export class GitLabDrive implements Contents.IDrive {
    *
    * @param path - An absolute POSIX file path on the server.
    */
-  getDownloadUrl(path: string): Promise<string> {
+  async getDownloadUrl(path: string): Promise<string> {
     // Parse the path into user/repo/path
     const resource = parsePath(path);
     // Error if the user has not been set
@@ -294,6 +324,11 @@ export class GitLabDrive implements Contents.IDrive {
     if (!resource.path) {
       return Promise.reject('GitLab: No file selected');
     }
+
+    const branch = await this.getDefaultBranch(
+      resource.user,
+      resource.repository
+    );
 
     // Create the url to get the raw file from the repository
     // https://docs.gitlab.com/ee/api/repository_files.html#get-raw-file-from-repository
@@ -312,8 +347,8 @@ export class GitLabDrive implements Contents.IDrive {
         'raw'
       ) +
       '?ref=' +
-      this._defaultBranch;
-    return Promise.resolve(rawUrl);
+      encodeURIComponent(branch);
+    return rawUrl;
   }
 
   /**
@@ -530,6 +565,7 @@ export class GitLabDrive implements Contents.IDrive {
   private _accessToken: string | null | undefined;
   private _validUser = false;
   private _defaultBranch = '';
+  private _defaultBranches = new Map<string, string>();
   private _serverSettings: ServerConnection.ISettings;
   private _useProxy: Promise<boolean>;
   private _fileTypeForPath: (path: string) => DocumentRegistry.IFileType;
